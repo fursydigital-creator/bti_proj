@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новини | БТІ Експерт</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .article-container { max-width: 800px; margin: 40px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .article-header { margin-bottom: 30px; text-align: center; }
+        .article-tag { display: inline-block; background: var(--accent-color); color: var(--secondary-color); padding: 5px 15px; border-radius: 20px; font-weight: 600; font-size: 13px; margin-bottom: 15px; }
+        .article-date { color: #888; font-size: 14px; margin-bottom: 10px; }
+        .article-title { font-size: 32px; color: var(--primary-color); line-height: 1.2; margin-bottom: 20px; }
+        .article-img { width: 100%; height: 400px; object-fit: cover; border-radius: 10px; margin-bottom: 30px; }
+        .article-body { font-size: 18px; line-height: 1.8; color: #444; }
+        .article-body h2, .article-body h3 { color: var(--primary-color); margin: 30px 0 15px; }
+        .article-body ul, .article-body ol { padding-left: 20px; margin-bottom: 20px; }
+        
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--primary-color); font-weight: 600; text-decoration: none; margin-bottom: 30px; transition: 0.3s; }
+        .back-link:hover { transform: translateX(-5px); }
+
+        @media (max-width: 768px) {
+            .article-container { padding: 20px; margin: 20px 10px; }
+            .article-title { font-size: 24px; }
+            .article-img { height: 250px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container nav-wrapper">
+            <a href="index.html" class="logo">🏢 БТІ<span>Експерт</span></a>
+            <nav id="nav-menu" class="nav-links">
+                <a href="index.html#about">Про БТІ</a>
+                <a href="index.html#services">Послуги</a>
+                <a href="index.html#faq">FAQ</a>
+                <a href="index.html#contacts">Контакти</a>
+            </nav>
+            <div class="mobile-toggle" onclick="toggleMenu()">☰</div>
+        </div>
+    </header>
+
+    <div class="container" style="margin-top: 40px;">
+        <a href="index.html#news" class="back-link">← Назад до новин</a>
+
+        <div id="article-loader" style="text-align: center; padding: 100px;">Завантаження статті...</div>
+
+        <article class="article-container" id="article-content" style="display: none;">
+            <div class="article-header">
+                <span class="article-tag" id="tag"></span>
+                <div class="article-date" id="date"></div>
+                <h1 class="article-title" id="title"></h1>
+            </div>
+            
+            <img src="" alt="Головне фото" class="article-img" id="main-img">
+            
+            <div class="article-body" id="content">
+                </div>
+        </article>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000/api';
+
+        async function loadArticle() {
+            // Дістаємо ID новини з URL (напр. article.html?id=5)
+            const urlParams = new URLSearchParams(window.location.search);
+            const newsId = urlParams.get('id');
+
+            if (!newsId) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/news/${newsId}`);
+                if (!response.ok) throw new Error();
+                
+                const n = await response.json();
+
+                // Заповнюємо дані на сторінці
+                document.title = `${n.title} | БТІ Експерт`;
+                document.getElementById('title').innerText = n.title;
+                document.getElementById('date').innerText = n.date_str;
+                document.getElementById('tag').innerText = n.tag;
+                document.getElementById('main-img').src = n.image_url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800';
+                
+                // Вставляємо HTML контент прямо в блок
+                document.getElementById('content').innerHTML = n.content;
+
+                // Показуємо статтю, ховаємо лоадер
+                document.getElementById('article-loader').style.display = 'none';
+                document.getElementById('article-content').style.display = 'block';
+
+            } catch (error) {
+                document.getElementById('article-loader').innerHTML = '<h2>Помилка: Новину не знайдено</h2><a href="index.html">Повернутися на головну</a>';
+            }
+        }
+
+        function toggleMenu() {
+            const nav = document.getElementById('nav-menu');
+            nav.classList.toggle('mobile-menu-open');
+        }
+
+        document.addEventListener('DOMContentLoaded', loadArticle);
+    </script>
+</body>
+</html>

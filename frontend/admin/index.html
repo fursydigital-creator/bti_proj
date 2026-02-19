@@ -4,10 +4,20 @@
     <meta charset="UTF-8">
     <title>Адмін-панель БТІ</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; display: flex; background: #f4f7f6; color: #333; height: 100vh;}
-        .sidebar { width: 260px; background: #1e293b; color: white; padding: 20px; display: flex; flex-direction: column; }
+        
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e293b; display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .login-card { background: white; padding: 40px; border-radius: 10px; width: 100%; max-width: 350px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .login-card h2 { text-align: center; margin-bottom: 25px; color: #0f172a; }
+        
+        #app-screen { display: none; width: 100%; height: 100%; }
+        .sidebar { width: 260px; background: #1e293b; color: white; padding: 20px; display: flex; flex-direction: column; flex-shrink: 0;}
         .sidebar h2 { font-size: 20px; margin-bottom: 30px; color: #38bdf8; text-align: center; }
         .sidebar button { background: transparent; color: #cbd5e1; border: none; text-align: left; padding: 12px 15px; margin-bottom: 8px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; transition: 0.2s; }
         .sidebar button:hover, .sidebar button.active { background: #334155; color: white; }
@@ -16,16 +26,14 @@
         .content { flex-grow: 1; padding: 40px; overflow-y: auto; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        
         .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;}
         .card h3 { margin-bottom: 15px; font-size: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
         
-        input[type="text"], select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; margin-bottom: 15px; }
-        textarea { height: 100px; resize: vertical; }
-        button.action-btn { background: #0ea5e9; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 10px;}
+        input[type="text"], input[type="password"], input[type="date"], input[type="url"], select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; margin-bottom: 15px; }        textarea { height: 100px; resize: vertical; }
+        button.action-btn { background: #0ea5e9; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 10px; width: 100%;}
         button.action-btn:hover { background: #0284c7; }
-        button.del-btn { background: #ef4444; padding: 6px 12px; font-size: 13px; float: right; margin-top: 0;}
-        button.add-row-btn { background: #10b981; padding: 8px 15px; }
+        button.del-btn { background: #ef4444; padding: 6px 12px; font-size: 13px; float: right; margin-top: 0; width: auto;}
+        button.add-row-btn { background: #10b981; padding: 8px 15px; width: auto; }
         
         .price-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
         .price-row input { margin-bottom: 0; }
@@ -33,108 +41,287 @@
         .price-row .col-price { flex: 1; }
         .price-row.header-row input { font-weight: bold; background: #f8fafc; }
         
-        .faq-list-item { border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; margin-bottom: 10px; }
+        .list-item { border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; margin-bottom: 10px; background: #f8fafc;}
         #status-msg { margin-top: 15px; padding: 10px; border-radius: 6px; display: none; font-weight: 500; background: #dcfce7; color: #166534; }
+        
+        /* Стилі для редактора Quill */
+        .ql-container { font-family: 'Inter', sans-serif; font-size: 15px; background: white; border-radius: 0 0 6px 6px; }
+        .ql-toolbar { border-radius: 6px 6px 0 0; background: #f8fafc; }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h2>БТІ Адмін</h2>
-        <button onclick="openTab('tab-hero')" class="active">Головна (Текст)</button>
-        <button onclick="openTab('tab-faq')">Часті питання (FAQ)</button>
-        <button onclick="openTab('tab-services')">Послуги та Ціни</button>
-        <a href="../index.html" target="_blank" class="site-link">Перейти на сайт ↗</a>
+    <div id="login-screen">
+        <div class="login-card">
+            <h2>Вхід в Адмінку</h2>
+            <form id="login-form">
+                <input type="text" id="username" placeholder="Логін (admin)" required>
+                <input type="password" id="password" placeholder="Пароль (admin2026)" required>
+                <button type="submit" class="action-btn">Увійти</button>
+                <div id="login-error" style="color: #ef4444; margin-top: 10px; display: none; text-align: center; font-size: 14px;">Невірні дані</div>
+            </form>
+        </div>
     </div>
 
-    <div class="content">
-        <div id="status-msg"></div>
-
-        <div id="tab-hero" class="tab-content active">
-            <h1>Текст на головній</h1>
-            <div class="card"><form id="hero-form"><textarea id="hero-text" required></textarea><button type="submit" class="action-btn">Зберегти</button></form></div>
+    <div id="app-screen">
+        <div class="sidebar">
+            <h2>БТІ Адмін</h2>
+            <button onclick="openTab('tab-hero')" class="active">Головна (Текст)</button>
+            <button onclick="openTab('tab-faq')">Часті питання (FAQ)</button>
+            <button onclick="openTab('tab-services')">Послуги та Ціни</button>
+            <button onclick="openTab('tab-news')">Новини (Блог)</button>
+            <button onclick="logout()" style="margin-top: 20px; color: #ef4444;">🚪 Вийти</button>
+            <button onclick="openTab('tab-contacts')">Контакти</button>
+            <a href="../index.html" target="_blank" class="site-link">Перейти на сайт ↗</a>
         </div>
 
-        <div id="tab-faq" class="tab-content">
-            <h1>Управління FAQ</h1>
-            <div class="card"><form id="faq-form"><input type="text" id="faq-q" placeholder="Питання" required><textarea id="faq-a" placeholder="Відповідь" required></textarea><button type="submit" class="action-btn">Додати</button></form></div>
-            <div class="card"><div id="faq-list">Завантаження...</div></div>
-        </div>
+        <div class="content">
+            <div id="status-msg"></div>
 
-        <div id="tab-services" class="tab-content">
-            <h1>Управління цінами</h1>
-            
-            <div class="card">
-                <h3>Оберіть сторінку для редагування</h3>
-                <select id="service-select" onchange="loadServiceData()">
-                    <option value="" disabled selected>-- Оберіть послугу --</option>
-                    <optgroup label="Технічний паспорт">
-                        <option value="tehpasport-kvartyra">Техпаспорт на квартиру</option>
-                        <option value="tehpasport-budynok">Техпаспорт на жилий будинок</option>
-                        <option value="tehpasport-garazh">Техпаспорт на гараж</option>
-                        <option value="tehpasport-dacha">На дачу або садовий будинок</option>
-                        <option value="tehpasport-vvedennya">На будинок для введення в експлуатацію</option>
-                        <option value="tehpasport-nezhyle">Техпаспорт на нежиле приміщення</option>
-                        <option value="tehpasport-vyrobnychi">Техпаспорт на виробничі будівлі</option>
-                    </optgroup>
-                    <optgroup label="Перепланування та реконструкція">
-                        <option value="tehpasport-pereplanuvannya-kvartyra">Перепланування квартири</option>
-                        <option value="tehpasport-pereplanuvannya-budynok">Перепланування будинку</option>
-                        <option value="tehpasport-pereplanuvannya-vyrobnychi">Перепланування виробничої будівлі</option>
-                        <option value="tehpasport-pereplanuvannya-nezhyle">Перепланування нежилого приміщення</option>
-                    </optgroup>
-                    <optgroup label="Додаткові послуги">
-                        <option value="ocinka">Оцінка нерухомого майна</option>
-                        <option value="budivelnyi-pasport">Будівельний паспорт</option>
-                        <option value="tehnichne-obstezhennya">Технічне обстеження будівель та споруд</option>
-                        <option value="perevedennya-dachnogo">Переведення дачного будинку в жилий</option>
-                    </optgroup>
-                </select>
+            <div id="tab-hero" class="tab-content active">
+                <h1>Текст на головній</h1>
+                <div class="card"><form id="hero-form"><textarea id="hero-text" required></textarea><button type="submit" class="action-btn" style="width: auto;">Зберегти</button></form></div>
             </div>
 
-            <div class="card" id="table-editor" style="display: none;">
-                <h3>Редактор таблиці</h3>
-                <input type="text" id="service-title" placeholder="Заголовок (напр. Техпаспорт на квартиру)">
-                
-                <div id="table-container"></div>
-                
-                <button type="button" class="action-btn add-row-btn" onclick="addTableRow('', '')">+ Додати рядок</button>
-                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
-                <button type="button" class="action-btn" onclick="saveServiceData()">💾 Зберегти таблицю</button>
+            <div id="tab-faq" class="tab-content">
+                <h1>Управління FAQ</h1>
+                <div class="card"><form id="faq-form"><input type="text" id="faq-q" placeholder="Питання" required><textarea id="faq-a" placeholder="Відповідь" required></textarea><button type="submit" class="action-btn" style="width: auto;">Додати</button></form></div>
+                <div class="card"><div id="faq-list">Завантаження...</div></div>
             </div>
+
+            <div id="tab-services" class="tab-content">
+                <h1>Управління цінами</h1>
+                <div class="card">
+                    <h3>Оберіть послугу</h3>
+                    <select id="service-select" onchange="loadServiceData()">
+                        <option value="" disabled selected>-- Оберіть послугу --</option>
+                        <optgroup label="Технічний паспорт">
+                            <option value="tehpasport-kvartyra">Техпаспорт на квартиру</option>
+                            <option value="tehpasport-budynok">Техпаспорт на жилий будинок</option>
+                            <option value="tehpasport-garazh">Техпаспорт на гараж</option>
+                            <option value="tehpasport-dacha">На дачу або садовий будинок</option>
+                            <option value="tehpasport-vvedennya">На будинок для введення в експлуатацію</option>
+                            <option value="tehpasport-nezhyle">Техпаспорт на нежиле приміщення</option>
+                            <option value="tehpasport-vyrobnychi">Техпаспорт на виробничі будівлі</option>
+                        </optgroup>
+                        <optgroup label="Перепланування та реконструк">
+                            <option value="tehpasport-pereplanuvannya-kvartyra">Перепланування квартири</option>
+                            <option value="tehpasport-pereplanuvannya-budynok">Перепланування будинку</option>
+                            <option value="tehpasport-pereplanuvannya-vyrobnychi">Перепланування виробничої будівлі</option>
+                            <option value="tehpasport-pereplanuvannya-nezhyle">Перепланування нежилого приміщення</option>
+                        </optgroup>
+                        <optgroup label="Додаткові послуги">
+                            <option value="ocinka">Оцінка нерухомого майна</option>
+                            <option value="budivelnyi-pasport">Будівельний паспорт</option>
+                            <option value="tehnichne-obstezhennya">Технічне обстеження будівель та споруд</option>
+                            <option value="perevedennya-dachnogo">Переведення дачного будинку в жилий</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="card" id="table-editor" style="display: none;">
+                    <h3>Редактор таблиці</h3>
+                    <input type="text" id="service-title" placeholder="Заголовок">
+                    <div id="table-container"></div>
+                    <button type="button" class="action-btn add-row-btn" onclick="addTableRow('', '')">+ Додати рядок</button>
+                    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
+                    <button type="button" class="action-btn" style="width: auto;" onclick="saveServiceData()">💾 Зберегти таблицю</button>
+                </div>
+            </div>
+
+            <div id="tab-news" class="tab-content">
+                <h1>Блог та Новини</h1>
+                
+                <div class="card">
+                    <h3>Додати нову статтю</h3>
+                    <form id="news-form">
+                        <input type="text" id="news-title" placeholder="Заголовок статті (напр. Як узаконити прибудову?)" required>
+                        
+                        <div style="display: flex; gap: 15px;">
+                            <input type="date" id="news-date" required>
+                            <select id="news-tag" required>
+                                <option value="" disabled selected>-- Оберіть категорію --</option>
+                                <option value="Новина">Новина</option>
+                                <option value="Порада">Корисна порада</option>
+                                <option value="Подія">Подія</option>
+                            </select>
+                        </div>
+                        
+                        <input type="url" id="news-image" placeholder="Посилання на картинку (URL)" required>
+                        <textarea id="news-preview" placeholder="Короткий опис для картки на головній сторінці (2-3 речення)" required></textarea>
+                        
+                        <label style="display:block; margin-bottom: 8px; font-weight: 600; color: #334155;">Повний текст статті:</label>
+                        <div id="quill-editor" style="height: 300px; margin-bottom: 20px;"></div>
+                        
+                        <button type="submit" class="action-btn" style="width: auto;">Опублікувати новину</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>Опубліковані новини</h3>
+                    <div id="news-list">Завантаження...</div>
+                </div>
+                <div id="tab-contacts" class="tab-content">
+                <h1>Контактна інформація</h1>
+                <div class="card">
+                    <form id="contacts-form">
+                        <label>Адреса:</label>
+                        <input type="text" id="c-address" placeholder="с. Фурси, вул. ...">
+
+                        <div style="display: flex; gap: 15px;">
+                            <div style="flex: 1;">
+                                <label>Телефон (для посилання, без пробілів):</label>
+                                <input type="text" id="c-phone-raw" placeholder="+380980000000">
+                            </div>
+                            <div style="flex: 1;">
+                                <label>Телефон (для показу на екрані):</label>
+                                <input type="text" id="c-phone-display" placeholder="(098) 000-00-00">
+                            </div>
+                        </div>
+
+                        <label>Email:</label>
+                        <input type="text" id="c-email" placeholder="example@gmail.com">
+
+                        <p style="margin-top: 20px; font-size: 14px; color: #666;" id="var-schedule">
+                            Графік роботи:<br>Завантаження...
+                        </p>
+
+                        <div style="display: flex; gap: 15px;">
+                            <div style="flex: 1;">
+                                <label>Telegram (URL):</label>
+                                <input type="url" id="c-telegram" placeholder="https://t.me/...">
+                            </div>
+                            <div style="flex: 1;">
+                                <label>Viber (URL):</label>
+                                <input type="text" id="c-viber" placeholder="viber://chat?number=...">
+                            </div>
+                        </div>
+
+            <button type="submit" class="action-btn" style="width: auto; margin-top: 20px;">💾 Зберегти контакти</button>
+        </form>
+    </div>
+</div>
+            </div>
+
         </div>
     </div>
 
     <script>
         const API_URL = 'http://127.0.0.1:8000/api';
+        
+        // --- ІНІЦІАЛІЗАЦІЯ QUILL.JS (Візуальний редактор) ---
+        var quill = new Quill('#quill-editor', {
+            theme: 'snow',
+            placeholder: 'Напишіть вашу статтю тут...',
+            modules: {
+                toolbar: [
+                    [{ 'header': [2, 3, false] }],
+                    ['bold', 'italic', 'underline'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['link'],
+                    ['clean'] // кнопка очищення форматування
+                ]
+            }
+        });
 
+        // --- АВТОРИЗАЦІЯ ---
+        function checkAuth() {
+            const token = localStorage.getItem('bti_token');
+            if (token) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'flex';
+                loadInitialData();
+            } else {
+                document.getElementById('login-screen').style.display = 'flex';
+                document.getElementById('app-screen').style.display = 'none';
+            }
+        }
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            try {
+                const res = await fetch(`${API_URL}/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) });
+                if (res.ok) {
+                    const data = await res.json();
+                    localStorage.setItem('bti_token', data.access_token);
+                    document.getElementById('login-error').style.display = 'none';
+                    checkAuth();
+                } else document.getElementById('login-error').style.display = 'block';
+            } catch(err) { console.error(err); }
+        });
+        function logout() { localStorage.removeItem('bti_token'); checkAuth(); }
+
+        async function fetchProtected(url, options = {}) {
+            const token = localStorage.getItem('bti_token');
+            options.headers = { ...options.headers, 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+            const response = await fetch(url, options);
+            if (response.status === 401) { logout(); alert("Сесія завершена. Увійдіть знову."); throw new Error("Unauthorized"); }
+            return response;
+        }
+
+        // --- ІНТЕРФЕЙС ТА НАВІГАЦІЯ ---
         function openTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.sidebar button').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             event.target.classList.add('active');
             if (tabId === 'tab-faq') loadFaqs();
+            if (tabId === 'tab-news') loadNews();
+            if (tabId === 'tab-contacts') loadContacts();
         }
 
-        function showStatus(msg) {
+        function showStatus(msg, isError = false) {
             const el = document.getElementById('status-msg');
-            el.textContent = msg; el.style.display = 'block';
+            el.textContent = msg; 
+            el.style.backgroundColor = isError ? '#fee2e2' : '#dcfce7';
+            el.style.color = isError ? '#991b1b' : '#166534';
+            el.style.display = 'block';
             setTimeout(() => el.style.display = 'none', 3000);
         }
 
-        // --- HERO ---
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const res = await fetch(`${API_URL}/settings/hero`);
-                const data = await res.json();
-                document.getElementById('hero-text').value = data.subtitle;
-            } catch(e) { console.error("Помилка завантаження Hero:", e); }
-        });
-        document.getElementById('hero-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await fetch(`${API_URL}/settings/hero/update`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subtitle: document.getElementById('hero-text').value }) });
-            showStatus('Текст збережено!');
-        });
+        async function loadInitialData() {
+            const res = await fetch(`${API_URL}/settings/hero`);
+            const data = await res.json();
+            document.getElementById('hero-text').value = data.subtitle;
+        }
+        
+        async function loadContacts() {
+        const res = await fetch(`${API_URL}/settings`);
+        const s = await res.json();
+        document.getElementById('c-address').value = s.address || '';
+        document.getElementById('c-phone-raw').value = s.phone1_raw || '';
+        document.getElementById('c-phone-display').value = s.phone1_display || '';
+        document.getElementById('c-email').value = s.email || '';
+        document.getElementById('c-schedule').value = s.schedule || '';
+        document.getElementById('c-telegram').value = s.telegram || '';
+        document.getElementById('c-viber').value = s.viber || '';
+            }
+
+            document.getElementById('contacts-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const data = {
+                    settings: {
+                        address: document.getElementById('c-address').value,
+                        phone1_raw: document.getElementById('c-phone-raw').value,
+                        phone1_display: document.getElementById('c-phone-display').value,
+                        email: document.getElementById('c-email').value,
+                        schedule: document.getElementById('c-schedule').value,
+                        telegram: document.getElementById('c-telegram').value,
+                        viber: document.getElementById('c-viber').value
+                    }
+                };
+                try {
+                    await fetchProtected(`${API_URL}/settings/bulk-update`, {
+                        method: 'POST',
+                        body: JSON.stringify(data)
+                    });
+                    showStatus('Контакти успішно оновлено!');
+                } catch(e) { showStatus('Помилка оновлення', true); }
+            });
+                document.getElementById('hero-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    try { await fetchProtected(`${API_URL}/settings/hero/update`, { method: 'POST', body: JSON.stringify({ subtitle: document.getElementById('hero-text').value }) }); showStatus('Текст збережено!'); } catch(e) {}
+                });
 
         // --- FAQ ---
         async function loadFaqs() {
@@ -142,91 +329,113 @@
             const faqs = await res.json();
             const list = document.getElementById('faq-list');
             list.innerHTML = '';
-            faqs.forEach(f => {
-                list.innerHTML += `<div class="faq-list-item"><button class="action-btn del-btn" onclick="deleteFaq(${f.id})">Видалити</button><strong>${f.question}</strong><p>${f.answer}</p></div>`;
-            });
+            faqs.forEach(f => { list.innerHTML += `<div class="list-item"><button class="action-btn del-btn" onclick="deleteFaq(${f.id})">Видалити</button><strong>${f.question}</strong><p>${f.answer}</p></div>`; });
         }
         document.getElementById('faq-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            await fetch(`${API_URL}/faqs`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: document.getElementById('faq-q').value, answer: document.getElementById('faq-a').value }) });
-            document.getElementById('faq-q').value = ''; document.getElementById('faq-a').value = '';
-            showStatus('Питання додано!'); loadFaqs();
+            try { await fetchProtected(`${API_URL}/faqs`, { method: 'POST', body: JSON.stringify({ question: document.getElementById('faq-q').value, answer: document.getElementById('faq-a').value }) }); document.getElementById('faq-q').value = ''; document.getElementById('faq-a').value = ''; showStatus('Питання додано!'); loadFaqs(); } catch(e) {}
         });
-        async function deleteFaq(id) {
-            if(confirm("Точно видалити?")) { await fetch(`${API_URL}/faqs/${id}`, { method: 'DELETE' }); showStatus('Видалено!'); loadFaqs(); }
-        }
+        async function deleteFaq(id) { if(confirm("Точно видалити?")) { try { await fetchProtected(`${API_URL}/faqs/${id}`, { method: 'DELETE' }); showStatus('Видалено!'); loadFaqs(); } catch(e) {} } }
 
         // --- ПОСЛУГИ ТА ЦІНИ ---
         let currentSlug = '';
-
         async function loadServiceData() {
             currentSlug = document.getElementById('service-select').value;
             if(!currentSlug) return;
-            
             document.getElementById('table-editor').style.display = 'block';
-            try {
-                const res = await fetch(`${API_URL}/services/${currentSlug}`);
-                const data = await res.json();
-                
-                document.getElementById('service-title').value = data.title;
-                const container = document.getElementById('table-container');
-                container.innerHTML = ''; 
-                
-                const tableData = data.table_data && data.table_data.length > 0 ? data.table_data : [["Послуга", "Ціна"]];
-                
-                tableData.forEach((row, index) => {
-                    addTableRow(row[0], row[1], index === 0);
-                });
-            } catch(e) {
-                console.error("Помилка завантаження таблиці:", e);
-                showStatus("Помилка завантаження даних");
-            }
+            const res = await fetch(`${API_URL}/services/${currentSlug}`);
+            const data = await res.json();
+            document.getElementById('service-title').value = data.title;
+            const container = document.getElementById('table-container');
+            container.innerHTML = ''; 
+            const tableData = data.table_data && data.table_data.length > 0 ? data.table_data : [["Послуга", "Ціна"]];
+            tableData.forEach((row, index) => addTableRow(row[0], row[1], index === 0));
         }
-
         function addTableRow(col1Val = '', col2Val = '', isHeader = false) {
             const container = document.getElementById('table-container');
             const rowDiv = document.createElement('div');
             rowDiv.className = `price-row ${isHeader ? 'header-row' : ''}`;
-            
-            rowDiv.innerHTML = `
-                <input type="text" class="col-name" value="${col1Val}" placeholder="${isHeader ? 'Назва колонки 1' : 'Назва послуги'}">
-                <input type="text" class="col-price" value="${col2Val}" placeholder="${isHeader ? 'Назва колонки 2' : 'Ціна'}">
-                ${!isHeader ? '<button type="button" class="action-btn del-btn" onclick="this.parentElement.remove()">X</button>' : '<div style="width: 44px;"></div>'}
-            `;
+            rowDiv.innerHTML = `<input type="text" class="col-name" value="${col1Val}" placeholder="${isHeader ? 'Назва колонки 1' : 'Назва послуги'}"><input type="text" class="col-price" value="${col2Val}" placeholder="${isHeader ? 'Назва колонки 2' : 'Ціна'}">${!isHeader ? '<button type="button" class="action-btn del-btn" onclick="this.parentElement.remove()">X</button>' : '<div style="width: 44px;"></div>'}`;
             container.appendChild(rowDiv);
         }
-
         async function saveServiceData() {
+            const title = document.getElementById('service-title').value;
+            const rows = document.querySelectorAll('.price-row');
+            const tableData = [];
+            rows.forEach(row => tableData.push([row.querySelector('.col-name').value, row.querySelector('.col-price').value]));
+            try { await fetchProtected(`${API_URL}/services/${currentSlug}`, { method: 'POST', body: JSON.stringify({ title: title, table_data: tableData }) }); showStatus('Таблицю успішно збережено в базі!'); } catch (error) { showStatus('Помилка збереження', true); }
+        }
+
+        // --- НОВИНИ ---
+        async function loadNews() {
             try {
-                console.log("Починаємо збереження..."); // Дебаг
-                const title = document.getElementById('service-title').value;
-                const rows = document.querySelectorAll('.price-row');
-                const tableData = [];
-                
-                rows.forEach(row => {
-                    const col1 = row.querySelector('.col-name').value;
-                    const col2 = row.querySelector('.col-price').value;
-                    tableData.push([col1, col2]); // ТЕПЕР ТУТ ТОЧНО PUSH
+                const res = await fetch(`${API_URL}/news`);
+                const newsList = await res.json();
+                const list = document.getElementById('news-list');
+                list.innerHTML = '';
+                if (newsList.length === 0) list.innerHTML = '<p>Новин поки немає.</p>';
+                newsList.forEach(n => { 
+                    list.innerHTML += `<div class="list-item">
+                        <button class="action-btn del-btn" onclick="deleteNews(${n.id})">Видалити</button>
+                        <strong>${n.title}</strong> <span style="color:#64748b; font-size:13px; margin-left: 10px;">🕒 ${n.date_str}</span>
+                        <div style="font-size: 13px; color: #0ea5e9; margin-top: 5px;">#${n.tag}</div>
+                    </div>`; 
                 });
+            } catch(e) { console.error("Помилка завантаження новин", e); }
+        }
 
-                console.log("Зібрані дані:", title, tableData); // Дебаг
+        document.getElementById('news-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Отримуємо HTML код статті з редактора Quill
+            const articleContent = quill.root.innerHTML;
+            
+            // Перевірка, чи не порожній редактор
+            if (quill.getText().trim().length === 0) {
+                alert("Текст статті не може бути порожнім!");
+                return;
+            }
 
-                const response = await fetch(`${API_URL}/services/${currentSlug}`, {
+            // Форматуємо дату з YYYY-MM-DD у DD.MM.YYYY
+            const dateInput = document.getElementById('news-date').value;
+            const [y, m, d] = dateInput.split('-');
+            const formattedDate = `${d}.${m}.${y}`;
+
+            const newsData = {
+                title: document.getElementById('news-title').value,
+                date_str: formattedDate,
+                tag: document.getElementById('news-tag').value,
+                image_url: document.getElementById('news-image').value,
+                preview: document.getElementById('news-preview').value,
+                content: articleContent
+            };
+
+            try {
+                await fetchProtected(`${API_URL}/news`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title: title, table_data: tableData })
+                    body: JSON.stringify(newsData)
                 });
+                
+                showStatus('Новину успішно опубліковано!');
+                document.getElementById('news-form').reset();
+                quill.root.innerHTML = ''; // Очищаємо редактор
+                loadNews(); // Оновлюємо список
+            } catch(err) {
+                showStatus('Помилка публікації', true);
+            }
+        });
 
-                if (response.ok) {
-                    showStatus('Таблицю успішно збережено в базі!');
-                } else {
-                    showStatus('Помилка сервера при збереженні.');
-                }
-            } catch (error) {
-                console.error("Критична помилка при збереженні:", error);
-                alert("Сталася помилка в скрипті! Натисніть F12, щоб подивитися вкладку Console.");
+        async function deleteNews(id) {
+            if(confirm("Ви дійсно хочете видалити цю новину/статтю?")) {
+                try {
+                    await fetchProtected(`${API_URL}/news/${id}`, { method: 'DELETE' });
+                    showStatus('Новину видалено!');
+                    loadNews();
+                } catch(e) {}
             }
         }
+
+        checkAuth();
     </script>
 </body>
 </html>

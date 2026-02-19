@@ -1,9 +1,23 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException, Security
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, Column, Integer, String, JSON
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from pydantic import BaseModel
 from typing import List
+import jwt
+
+# --- НАЛАШТУВАННЯ БЕЗПЕКИ (JWT) ---
+SECRET_KEY = "bti_super_secret_key_2026"
+ALGORITHM = "HS256"
+security = HTTPBearer()
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Security(security)):
+    try:
+        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except:
+        raise HTTPException(status_code=401, detail="Невірний або прострочений токен")
 
 # --- 1. БАЗА ДАНИХ ---
 SQLALCHEMY_DATABASE_URL = "sqlite:///./bti.db"
@@ -24,13 +38,23 @@ class FAQ(Base):
     question = Column(String)
     answer = Column(String)
 
-# НОВА МОДЕЛЬ: ПОСЛУГИ ТА ТАБЛИЦІ ЦІН
 class Service(Base):
     __tablename__ = "services"
     id = Column(Integer, primary_key=True, index=True)
-    slug = Column(String, unique=True, index=True) # напр. "tehpasport-kvartyra"
-    title = Column(String)                         # напр. "Техпаспорт на квартиру"
-    table_data = Column(JSON)                      # Зберігатимемо масив рядків
+    slug = Column(String, unique=True, index=True)
+    title = Column(String)
+    table_data = Column(JSON)
+
+# НОВА МОДЕЛЬ: НОВИНИ
+class NewsItem(Base):
+    __tablename__ = "news"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String)
+    date_str = Column(String)      # Напр. "15.03.2026"
+    tag = Column(String)           # Напр. "Новина", "Порада"
+    image_url = Column(String)     # Посилання на картинку
+    preview = Column(String)       # Короткий текст для картки на головній
+    content = Column(String)       # Повний HTML текст статті з редактора
 
 Base.metadata.create_all(bind=engine)
 
@@ -40,66 +64,125 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, 
 
 def get_db():
     db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    try: yield db
+    finally: db.close()
 
+# --- СХЕМИ ДАНИХ ---
+class LoginData(BaseModel): username: str; password: str
 class HeroUpdate(BaseModel): subtitle: str
 class FAQCreate(BaseModel): question: str; answer: str
+class ServiceUpdate(BaseModel): title: str; table_data: List[List[str]]
 
-# НОВІ СХЕМИ ДЛЯ ПОСЛУГ
-class ServiceUpdate(BaseModel):
+# СХЕМА ДЛЯ НОВИН
+class NewsCreate(BaseModel):
     title: str
-    table_data: List[List[str]]  # Масив масивів (рядки і колонки таблиці)
+    date_str: str
+    tag: str
+    image_url: str
+    preview: str
+    content: str
 
-# --- 4. МАРШРУТИ (HERO та FAQ залишились без змін) ---
+# Отримання однієї конкретної новини за ID (відкритий маршрут)
+@app.get("/api/news/{news_id}")
+def get_single_news(news_id: int, db: Session = Depends(get_db)):
+    item = db.query(NewsItem).filter(NewsItem.id == news_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Новину не знайдено")
+    return item
+
+# --- 4. МАРШРУТ АВТОРИЗАЦІЇ ---
+@app.post("/api/login")
+def login(data: LoginData):
+    if data.username == "admin" and data.password == "admin2026":
+        token = jwt.encode({"sub": data.username}, SECRET_KEY, algorithm=ALGORITHM)
+        return {"access_token": token}
+    raise HTTPException(status_code=401, detail="Невірний логін або пароль")
+
+# --- 5. ВІДКРИТІ МАРШРУТИ (ДЛЯ САЙТУ) ---
 @app.get("/api/settings/hero")
 def get_hero_text(db: Session = Depends(get_db)):
     setting = db.query(Setting).filter(Setting.key == "hero_subtitle").first()
     return {"subtitle": setting.value if setting else "Завантаження..."}
 
+@app.get("/api/faqs")
+def get_faqs(db: Session = Depends(get_db)): return db.query(FAQ).all()
+
+@app.get("/api/services/{slug}")
+def get_service(slug: str, db: Session = Depends(get_db)):
+    service = db.query(Service).filter(Service.slug == slug).first()
+    if service: return {"slug": service.slug, "title": service.title, "table_data": service.table_data}
+    return {"slug": slug, "title": "Нова послуга", "table_data": [["Послуга", "Ціна"]]}
+
+# Отримання списку новин (сортуємо від найновіших)
+@app.get("/api/news")
+def get_news(db: Session = Depends(get_db)):
+    return db.query(NewsItem).order_by(NewsItem.id.desc()).all()
+
+
+
+# --- 6. ЗАХИЩЕНІ МАРШРУТИ (ДЛЯ АДМІНКИ) ---
 @app.post("/api/settings/hero/update")
-def update_hero_text(data: HeroUpdate, db: Session = Depends(get_db)):
+def update_hero_text(data: HeroUpdate, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
     setting = db.query(Setting).filter(Setting.key == "hero_subtitle").first()
     if setting: setting.value = data.subtitle
     else: db.add(Setting(key="hero_subtitle", value=data.subtitle))
     db.commit()
     return {"message": "Текст оновлено!"}
 
-@app.get("/api/faqs")
-def get_faqs(db: Session = Depends(get_db)): return db.query(FAQ).all()
-
 @app.post("/api/faqs")
-def create_faq(faq: FAQCreate, db: Session = Depends(get_db)):
+def create_faq(faq: FAQCreate, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
     db.add(FAQ(question=faq.question, answer=faq.answer))
     db.commit()
     return {"message": "Питання додано!"}
 
 @app.delete("/api/faqs/{faq_id}")
-def delete_faq(faq_id: int, db: Session = Depends(get_db)):
+def delete_faq(faq_id: int, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
     faq = db.query(FAQ).filter(FAQ.id == faq_id).first()
-    if faq:
-        db.delete(faq)
-        db.commit()
-
-# --- 5. НОВІ МАРШРУТИ: ТАБЛИЦІ ПОСЛУГ ---
-@app.get("/api/services/{slug}")
-def get_service(slug: str, db: Session = Depends(get_db)):
-    service = db.query(Service).filter(Service.slug == slug).first()
-    if service:
-        return {"slug": service.slug, "title": service.title, "table_data": service.table_data}
-    # Якщо послуги ще немає в базі, повертаємо порожній шаблон
-    return {"slug": slug, "title": "Нова послуга", "table_data": [["Послуга", "Ціна"]]}
+    if faq: db.delete(faq); db.commit()
 
 @app.post("/api/services/{slug}")
-def update_service(slug: str, data: ServiceUpdate, db: Session = Depends(get_db)):
+def update_service(slug: str, data: ServiceUpdate, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
     service = db.query(Service).filter(Service.slug == slug).first()
     if service:
-        service.title = data.title
-        service.table_data = data.table_data
+        service.title = data.title; service.table_data = data.table_data
     else:
-        new_service = Service(slug=slug, title=data.title, table_data=data.table_data)
-        db.add(new_service)
+        db.add(Service(slug=slug, title=data.title, table_data=data.table_data))
     db.commit()
     return {"message": "Таблицю успішно збережено!"}
+
+# Додавання нової статті
+@app.post("/api/news")
+def create_news(news: NewsCreate, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
+    new_item = NewsItem(**news.dict())
+    db.add(new_item)
+    db.commit()
+    return {"message": "Новину успішно опубліковано!"}
+
+# Видалення статті
+@app.delete("/api/news/{news_id}")
+def delete_news(news_id: int, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
+    news_item = db.query(NewsItem).filter(NewsItem.id == news_id).first()
+    if news_item: db.delete(news_item); db.commit()
+    return {"message": "Новину видалено"}
+
+# Схема для масового оновлення налаштувань
+class SettingsUpdate(BaseModel):
+    settings: dict  # Прийматиме об'єкт типу {"address": "...", "phone1_raw": "..."}
+
+# Отримання всіх налаштувань (відкритий маршрут)
+@app.get("/api/settings")
+def get_all_settings(db: Session = Depends(get_db)):
+    all_s = db.query(Setting).all()
+    return {s.key: s.value for s in all_s}
+
+# Масове оновлення налаштувань (захищений маршрут)
+@app.post("/api/settings/bulk-update")
+def bulk_update_settings(data: SettingsUpdate, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
+    for key, value in data.settings.items():
+        setting = db.query(Setting).filter(Setting.key == key).first()
+        if setting:
+            setting.value = value
+        else:
+            db.add(Setting(key=key, value=value))
+    db.commit()
+    return {"message": "Налаштування оновлено"}
