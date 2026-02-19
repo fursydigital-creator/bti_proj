@@ -73,6 +73,8 @@ class HeroUpdate(BaseModel): subtitle: str
 class FAQCreate(BaseModel): question: str; answer: str
 class ServiceUpdate(BaseModel): title: str; table_data: List[List[str]]
 
+
+
 # СХЕМА ДЛЯ НОВИН
 class NewsCreate(BaseModel):
     title: str
