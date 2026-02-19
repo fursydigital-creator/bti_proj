@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Адмін-панель БТІ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; display: flex; background: #f4f7f6; color: #333; height: 100vh;}
+        .sidebar { width: 260px; background: #1e293b; color: white; padding: 20px; display: flex; flex-direction: column; }
+        .sidebar h2 { font-size: 20px; margin-bottom: 30px; color: #38bdf8; text-align: center; }
+        .sidebar button { background: transparent; color: #cbd5e1; border: none; text-align: left; padding: 12px 15px; margin-bottom: 8px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; transition: 0.2s; }
+        .sidebar button:hover, .sidebar button.active { background: #334155; color: white; }
+        .sidebar .site-link { margin-top: auto; background: #0f172a; text-align: center; text-decoration: none; color: white; padding: 12px; border-radius: 6px;}
+        
+        .content { flex-grow: 1; padding: 40px; overflow-y: auto; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;}
+        .card h3 { margin-bottom: 15px; font-size: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
+        
+        input[type="text"], select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; margin-bottom: 15px; }
+        textarea { height: 100px; resize: vertical; }
+        button.action-btn { background: #0ea5e9; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 10px;}
+        button.action-btn:hover { background: #0284c7; }
+        button.del-btn { background: #ef4444; padding: 6px 12px; font-size: 13px; float: right; margin-top: 0;}
+        button.add-row-btn { background: #10b981; padding: 8px 15px; }
+        
+        .price-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .price-row input { margin-bottom: 0; }
+        .price-row .col-name { flex: 2; }
+        .price-row .col-price { flex: 1; }
+        .price-row.header-row input { font-weight: bold; background: #f8fafc; }
+        
+        .faq-list-item { border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; margin-bottom: 10px; }
+        #status-msg { margin-top: 15px; padding: 10px; border-radius: 6px; display: none; font-weight: 500; background: #dcfce7; color: #166534; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>БТІ Адмін</h2>
+        <button onclick="openTab('tab-hero')" class="active">Головна (Текст)</button>
+        <button onclick="openTab('tab-faq')">Часті питання (FAQ)</button>
+        <button onclick="openTab('tab-services')">Послуги та Ціни</button>
+        <a href="../index.html" target="_blank" class="site-link">Перейти на сайт ↗</a>
+    </div>
+
+    <div class="content">
+        <div id="status-msg"></div>
+
+        <div id="tab-hero" class="tab-content active">
+            <h1>Текст на головній</h1>
+            <div class="card"><form id="hero-form"><textarea id="hero-text" required></textarea><button type="submit" class="action-btn">Зберегти</button></form></div>
+        </div>
+
+        <div id="tab-faq" class="tab-content">
+            <h1>Управління FAQ</h1>
+            <div class="card"><form id="faq-form"><input type="text" id="faq-q" placeholder="Питання" required><textarea id="faq-a" placeholder="Відповідь" required></textarea><button type="submit" class="action-btn">Додати</button></form></div>
+            <div class="card"><div id="faq-list">Завантаження...</div></div>
+        </div>
+
+        <div id="tab-services" class="tab-content">
+            <h1>Управління цінами</h1>
+            
+            <div class="card">
+                <h3>Оберіть сторінку для редагування</h3>
+                <select id="service-select" onchange="loadServiceData()">
+                    <option value="" disabled selected>-- Оберіть послугу --</option>
+                    <optgroup label="Технічний паспорт">
+                        <option value="tehpasport-kvartyra">Техпаспорт на квартиру</option>
+                        <option value="tehpasport-budynok">Техпаспорт на жилий будинок</option>
+                        <option value="tehpasport-garazh">Техпаспорт на гараж</option>
+                        <option value="tehpasport-dacha">На дачу або садовий будинок</option>
+                        <option value="tehpasport-vvedennya">На будинок для введення в експлуатацію</option>
+                        <option value="tehpasport-nezhyle">Техпаспорт на нежиле приміщення</option>
+                        <option value="tehpasport-vyrobnychi">Техпаспорт на виробничі будівлі</option>
+                    </optgroup>
+                    <optgroup label="Перепланування та реконструкція">
+                        <option value="tehpasport-pereplanuvannya-kvartyra">Перепланування квартири</option>
+                        <option value="tehpasport-pereplanuvannya-budynok">Перепланування будинку</option>
+                        <option value="tehpasport-pereplanuvannya-vyrobnychi">Перепланування виробничої будівлі</option>
+                        <option value="tehpasport-pereplanuvannya-nezhyle">Перепланування нежилого приміщення</option>
+                    </optgroup>
+                    <optgroup label="Додаткові послуги">
+                        <option value="ocinka">Оцінка нерухомого майна</option>
+                        <option value="budivelnyi-pasport">Будівельний паспорт</option>
+                        <option value="tehnichne-obstezhennya">Технічне обстеження будівель та споруд</option>
+                        <option value="perevedennya-dachnogo">Переведення дачного будинку в жилий</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="card" id="table-editor" style="display: none;">
+                <h3>Редактор таблиці</h3>
+                <input type="text" id="service-title" placeholder="Заголовок (напр. Техпаспорт на квартиру)">
+                
+                <div id="table-container"></div>
+                
+                <button type="button" class="action-btn add-row-btn" onclick="addTableRow('', '')">+ Додати рядок</button>
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
+                <button type="button" class="action-btn" onclick="saveServiceData()">💾 Зберегти таблицю</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000/api';
+
+        function openTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.sidebar button').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+            if (tabId === 'tab-faq') loadFaqs();
+        }
+
+        function showStatus(msg) {
+            const el = document.getElementById('status-msg');
+            el.textContent = msg; el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+
+        // --- HERO ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch(`${API_URL}/settings/hero`);
+                const data = await res.json();
+                document.getElementById('hero-text').value = data.subtitle;
+            } catch(e) { console.error("Помилка завантаження Hero:", e); }
+        });
+        document.getElementById('hero-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await fetch(`${API_URL}/settings/hero/update`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subtitle: document.getElementById('hero-text').value }) });
+            showStatus('Текст збережено!');
+        });
+
+        // --- FAQ ---
+        async function loadFaqs() {
+            const res = await fetch(`${API_URL}/faqs`);
+            const faqs = await res.json();
+            const list = document.getElementById('faq-list');
+            list.innerHTML = '';
+            faqs.forEach(f => {
+                list.innerHTML += `<div class="faq-list-item"><button class="action-btn del-btn" onclick="deleteFaq(${f.id})">Видалити</button><strong>${f.question}</strong><p>${f.answer}</p></div>`;
+            });
+        }
+        document.getElementById('faq-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await fetch(`${API_URL}/faqs`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: document.getElementById('faq-q').value, answer: document.getElementById('faq-a').value }) });
+            document.getElementById('faq-q').value = ''; document.getElementById('faq-a').value = '';
+            showStatus('Питання додано!'); loadFaqs();
+        });
+        async function deleteFaq(id) {
+            if(confirm("Точно видалити?")) { await fetch(`${API_URL}/faqs/${id}`, { method: 'DELETE' }); showStatus('Видалено!'); loadFaqs(); }
+        }
+
+        // --- ПОСЛУГИ ТА ЦІНИ ---
+        let currentSlug = '';
+
+        async function loadServiceData() {
+            currentSlug = document.getElementById('service-select').value;
+            if(!currentSlug) return;
+            
+            document.getElementById('table-editor').style.display = 'block';
+            try {
+                const res = await fetch(`${API_URL}/services/${currentSlug}`);
+                const data = await res.json();
+                
+                document.getElementById('service-title').value = data.title;
+                const container = document.getElementById('table-container');
+                container.innerHTML = ''; 
+                
+                const tableData = data.table_data && data.table_data.length > 0 ? data.table_data : [["Послуга", "Ціна"]];
+                
+                tableData.forEach((row, index) => {
+                    addTableRow(row[0], row[1], index === 0);
+                });
+            } catch(e) {
+                console.error("Помилка завантаження таблиці:", e);
+                showStatus("Помилка завантаження даних");
+            }
+        }
+
+        function addTableRow(col1Val = '', col2Val = '', isHeader = false) {
+            const container = document.getElementById('table-container');
+            const rowDiv = document.createElement('div');
+            rowDiv.className = `price-row ${isHeader ? 'header-row' : ''}`;
+            
+            rowDiv.innerHTML = `
+                <input type="text" class="col-name" value="${col1Val}" placeholder="${isHeader ? 'Назва колонки 1' : 'Назва послуги'}">
+                <input type="text" class="col-price" value="${col2Val}" placeholder="${isHeader ? 'Назва колонки 2' : 'Ціна'}">
+                ${!isHeader ? '<button type="button" class="action-btn del-btn" onclick="this.parentElement.remove()">X</button>' : '<div style="width: 44px;"></div>'}
+            `;
+            container.appendChild(rowDiv);
+        }
+
+        async function saveServiceData() {
+            try {
+                console.log("Починаємо збереження..."); // Дебаг
+                const title = document.getElementById('service-title').value;
+                const rows = document.querySelectorAll('.price-row');
+                const tableData = [];
+                
+                rows.forEach(row => {
+                    const col1 = row.querySelector('.col-name').value;
+                    const col2 = row.querySelector('.col-price').value;
+                    tableData.push([col1, col2]); // ТЕПЕР ТУТ ТОЧНО PUSH
+                });
+
+                console.log("Зібрані дані:", title, tableData); // Дебаг
+
+                const response = await fetch(`${API_URL}/services/${currentSlug}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: title, table_data: tableData })
+                });
+
+                if (response.ok) {
+                    showStatus('Таблицю успішно збережено в базі!');
+                } else {
+                    showStatus('Помилка сервера при збереженні.');
+                }
+            } catch (error) {
+                console.error("Критична помилка при збереженні:", error);
+                alert("Сталася помилка в скрипті! Натисніть F12, щоб подивитися вкладку Console.");
+            }
+        }
+    </script>
+</body>
+</html>

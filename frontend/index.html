@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>БТІ Експерт | Офіційний сайт</title>
+    <meta name="description" content="Бюро технічної інвентаризації. Техпаспорт, оцінка, узаконення.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏢</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet"
+    href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="container nav-wrapper">
+            <a href="#" class="logo">
+                🏢 БТІ<span>Експерт</span>
+            </a>
+            
+            <nav id="nav-menu" class="nav-links">
+                <a href="#about">Про БТІ</a>
+                <a href="#services">Послуги</a>
+                <a href="#downloads">Завантаження</a>
+                <a href="#faq">FAQ</a>
+                <a href="#contacts">Контакти</a>
+            </nav>
+
+
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Бюро Технічної Інвентаризації</h1>
+            <p id="hero-subtitle">
+                Завантаження...
+            </p>
+            <div class="hero-buttons">
+                <button class="btn-base btn-main" onclick="document.getElementById('contacts').scrollIntoView({behavior: 'smooth'})">Замовити послугу</button>
+                <button class="btn-base btn-outline" onclick="document.getElementById('services').scrollIntoView({behavior: 'smooth'})">Дізнатись більше</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="section-padding bg-white">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-content">
+                    <div class="section-title-left">
+                        <h2>Про БТІ Експерт</h2>
+                        <div class="title-line"></div>
+                    </div>
+                    <p class="about-text">
+                        Наше комунальне підприємство здійснює професійну технічну інвентаризацію об'єктів нерухомості будь-якої складності.
+                    </p>
+                    <p class="about-text">
+                        Ми відійшли від застарілих бюрократичних процедур. При наданні послуг ми враховуємо всі технічні та юридичні чинники, вирішуючи питання клієнтів швидко та прозоро.
+                    </p>
+                    
+                    <ul class="about-features">
+                        <li>
+                            <span class="check-icon">✓</span>
+                            <span>Офіційні документи державного зразка</span>
+                        </li>
+                        <li>
+                            <span class="check-icon">✓</span>
+                            <span>Вирішення питань у найкоротші терміни</span>
+                        </li>
+                        <li>
+                            <span class="check-icon">✓</span>
+                            <span>Розумна цінова політика без прихованих платежів</span>
+                        </li>
+                    </ul>
+
+                    <a href="#services" class="btn-text-arrow">Переглянути послуги &rarr;</a>
+                </div>
+
+                <div class="about-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1554469384-e58fac16e23a?auto=format&fit=crop&w=800&q=80" alt="Сучасна будівля" class="about-img">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="section-padding bg-light">
+        <div class="container">
+            <div class="section-title">
+                <h2>Наші послуги</h2>
+                <p>Оберіть категорію для отримання детальної інформації</p>
+            </div>
+
+  <div class="service-category">
+                <h3 class="category-title">Технічний паспорт</h3>
+                <div class="services-grid-modern">
+                    <a href="tehpasport-kvartyra.html" class="service-item-card">
+                        <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=350&fit=crop" alt="Квартира" class="service-item-img">
+                        <div class="service-item-text">Технічний паспорт на квартиру</div>
+                    </a>
+                    <a href="tehpasport-budynok.html" class="service-item-card">
+                        <img src="https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=500&h=350&fit=crop" alt="Жилий будинок" class="service-item-img">
+                        <div class="service-item-text">Технічний паспорт на жилий будинок</div>
+                    </a>
+                    <a href="tehpasport-garazh.html" class="service-item-card">
+                        <img src="https://images.unsplash.com/photo-1530982011887-3cc11cc85693?w=500&h=350&fit=crop" alt="Гараж" class="service-item-img">
+                        <div class="service-item-text">Технічний паспорт на гараж</div>
+                    </a>
+                    <a href="tehpasport-dacha.html" class="service-item-card">
+                        <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=500&h=350&fit=crop" alt="Дача" class="service-item-img">
+                        <div class="service-item-text">На дачу або садовий будинок</div>
+                    </a>
+                    <a href="tehpasport-vvedennya.html" class="service-item-card">
+                        <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=500&h=350&fit=crop" alt="Введення в експлуатацію" class="service-item-img">
+                        <div class="service-item-text">На будинок для введення в експлуатацію</div>
+                    </a>
+                    <a href="tehpasport-nezhyle.html" class="service-item-card">
+                        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=500&h=350&fit=crop" alt="Нежиле приміщення" class="service-item-img">
+                        <div class="service-item-text">Технічний паспорт на нежиле приміщення</div>
+                    </a>
+                    <a href="tehpasport-vyrobnychi.html" class="service-item-card">
+                        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=500&h=350&fit=crop" alt="Виробничі будівлі" class="service-item-img">
+                        <div class="service-item-text">Технічний паспорт на виробничі будівлі</div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="service-category">
+                <h3 class="category-title">Перепланування та реконструкція</h3>
+                <div class="services-grid-modern">
+                    <a href="tehpasport-pereplanuvannya-kvartyra.html" class="service-item-card">
+                        <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=500&h=350&fit=crop" alt="Перепланування квартири" class="service-item-img">
+                        <div class="service-item-text">Перепланування або реконструкція квартири</div>
+                    </a>
+                    <a href="tehpasport-pereplanuvannya-budynok.html" class="service-item-card">
+                        <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=500&h=350&fit=crop" alt="Перепланування будинку" class="service-item-img">
+                        <div class="service-item-text">Перепланування або реконструкція будинку</div>
+                    </a>
+                    <a href="tehpasport-pereplanuvannya-vyrobnychi.html" class="service-item-card">
+                        <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&h=350&fit=crop" alt="Перепланування виробництва" class="service-item-img">
+                        <div class="service-item-text">Перепланування або реконст. виробничої будівлі</div>
+                    </a>
+                    <a href="tehpasport-pereplanuvannya-nezhyle.html" class="service-item-card">
+                        <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=500&h=350&fit=crop" alt="Перепланування нежилого" class="service-item-img">
+                        <div class="service-item-text">Перепланування або реконст. нежилого приміщення</div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="service-category">
+                <h3 class="category-title">Додаткові послуги</h3>
+                <div class="services-grid-modern">
+                    <a href="ocinka.html" class="service-item-card">
+                        <img src="https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=500&h=350&fit=crop" alt="Оцінка" class="service-item-img">
+                        <div class="service-item-text">Оцінка нерухомого майна</div>
+                    </a>
+                    <a href="budivelnyi-pasport.html" class="service-item-card">
+                        <img src="https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?w=500&h=350&fit=crop" alt="Будівельний паспорт" class="service-item-img">
+                        <div class="service-item-text">Будівельний паспорт</div>
+                    </a>
+                    <a href="tehnichne-obstezhennya.html" class="service-item-card">
+                        <img src="https://images.unsplash.com/photo-1581092335397-9583eb92d232?w=500&h=350&fit=crop" alt="Технічне обстеження" class="service-item-img">
+                        <div class="service-item-text">Технічне обстеження будівель та споруд</div>
+                    </a>
+                    <a href="perevedennya-dachnogo.html" class="service-item-card">
+                        <img src="https://images.unsplash.com/photo-1449844908441-8829872d2607?w=500&h=350&fit=crop" alt="Переведення дачного в жилий" class="service-item-img">
+                        <div class="service-item-text">Переведення дачного будинку в жилий</div>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    <section id="advantages" class="section-padding bg-white">
+        <div class="container">
+            <div class="section-title">
+                <h2>БТІ здорової людини</h2>
+                <p>Як ми зламали систему бюрократії, щоб зекономити ваші нерви</p>
+            </div>
+            
+            <div class="advantages-grid">
+                <div class="advantage-card">
+                    <div class="adv-icon">📱</div>
+                    <h3>БТІ у вашому смартфоні</h3>
+                    <p>Забудьте про талончики та очікування в коридорах. Ви просто скидаєте фото документів у Viber/Telegram, інженер приїжджає у зручний час, а готовий паспорт ми <strong>безкоштовно</strong> привозимо вам додому.</p>
+                </div>
+                
+                <div class="advantage-card">
+                    <div class="adv-icon">🤝</div>
+                    <h3>Оплата за результат</h3>
+                    <p>Ніяких авансів, прихованих комісій чи біганини з квитанціями до банку. Ви платите рівно ту суму, яку вам озвучили на старті, і <strong>лише тоді</strong>, коли тримаєте готовий документ у руках.</p>
+                </div>
+                
+                <div class="advantage-card">
+                    <div class="adv-icon">🛡️</div>
+                    <h3>Залізобетонна легітимність</h3>
+                    <p>Жодних "папірців", які потім заверне нотаріус чи ЦНАП. Всі наші документи гарантовано проходять реєстрацію в державному реєстрі (ЄДЕССБ) та мають унікальний QR-код для перевірки.</p>
+                </div>
+                
+                <div class="advantage-card">
+                    <div class="adv-icon">🔥</div>
+                    <h3>Рятуємо від паперового пекла</h3>
+                    <p>Знесли стіну? Хочете узаконити прибудову чи перевести дачу в жилий фонд? Ми не просто "міряємо площу" — ми підказуємо, як легально обійти гострі кути, і беремо всю паперову тяганину на себе.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="downloads" class="section-padding bg-light">
+        <div class="container">
+            <div class="section-title">
+                <h2>Завантаження документів</h2>
+                <p>Оберіть необхідний бланк</p>
+            </div>
+            
+            <div class="downloads-grid">
+                <a href="#" class="doc-card">
+                    <div class="doc-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                    </div>
+                    <h3 class="doc-title">Заява на інвентаризацію</h3>
+                    <span class="doc-type">PDF файл</span>
+                    <span class="doc-btn">Завантажити</span>
+                </a>
+
+                <a href="#" class="doc-card">
+                    <div class="doc-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    </div>
+                    <h3 class="doc-title">Опитувальний лист</h3>
+                    <span class="doc-type">PDF файл</span>
+                    <span class="doc-btn">Завантажити</span>
+                </a>
+
+                <a href="#" class="doc-card">
+                    <div class="doc-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M16 13H8"></path><path d="M16 17H8"></path><path d="M10 9H8"></path></svg>
+                    </div>
+                    <h3 class="doc-title">Зразок договору</h3>
+                    <span class="doc-type">PDF файл</span>
+                    <span class="doc-btn">Завантажити</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="section-padding">
+        <div class="container">
+            <div class="section-title">
+                <h2>Часті питання (FAQ)</h2>
+            </div>
+            <div class="faq-wrapper" id="faq-wrapper">
+            </div>
+    </section>
+    <section id="news" class="section-padding bg-light">
+        <div class="container">
+            <div class="section-title">
+                <h2>Новини та корисні поради</h2>
+                <p>Актуальна інформація у сфері нерухомості та звіти про нашу роботу</p>
+            </div>
+            
+            <div class="news-grid" id="news-container">
+                <article class="news-card">
+                    <div class="news-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop" alt="Новина 1">
+                        <span class="news-tag">Новини</span>
+                    </div>
+                    <div class="news-content">
+                        <div class="news-meta">12.10.2025 • Коментарів немає</div>
+                        <h3>Особливості документального супроводу нерухомості у 2025 році</h3>
+                        <p>Дізнайтеся про головні зміни в законодавстві та нові вимоги до техпаспортів...</p>
+                        <a href="#" class="news-link">Читати далі →</a>
+                    </div>
+                </article>
+
+                <article class="news-card">
+                    <div class="news-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&h=400&fit=crop" alt="Новина 2">
+                        <span class="news-tag">Поради</span>
+                    </div>
+                    <div class="news-content">
+                        <div class="news-meta">10.10.2025 • Коментарів немає</div>
+                        <h3>Як підготуватися до замовлення технічного паспорта?</h3>
+                        <p>Покрокова інструкція: які документи зібрати та на що звернути увагу при візиті інженера...</p>
+                        <a href="#" class="news-link">Читати далі →</a>
+                    </div>
+                </article>
+
+                <article class="news-card">
+                    <div class="news-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&h=400&fit=crop" alt="Новина 3">
+                        <span class="news-tag">Подія</span>
+                    </div>
+                    <div class="news-content">
+                        <div class="news-meta">05.10.2025 • Коментарів немає</div>
+                        <h3>КП БТІ Фурсівської сільської ради запустило офіційний сайт</h3>
+                        <p>Ми стали ще ближче! Тепер замовити послуги БТІ можна онлайн в декілька кліків...</p>
+                        <a href="#" class="news-link">Читати далі →</a>
+                    </div>
+                </article>
+            </div>
+            
+            <div style="text-align: center; margin-top: 50px;">
+                <a href="news.html" class="btn-news-more">Більше корисних статей</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="contacts" class="section-padding bg-white">
+        <div class="container">
+            <div class="section-title">
+                <h2>Контакти</h2>
+            </div>
+            <div class="contact-wrapper">
+                <div class="contact-info">
+                    <h3 style="margin-bottom: 20px; color: var(--primary-color);">Зв'яжіться з нами</h3>
+                    <ul class="contact-list">
+                        <li><span>📍</span> <span class="var-address-text"></span></li>
+                        
+                        <li><span>📞</span> <a href="#" class="var-phone1-link var-phone1-text"></a></li>
+                                               
+                        <li><span>📧</span> <a href="#" class="var-email-link var-email-text"></a></li>
+                    </ul>
+                    <div style="margin-top: 20px; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                        <iframe 
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2575.309092856275!2d29.99763717605766!3d49.799056434051835!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40d3413537d42015%3A0x6e3b86664cdaacfb!2z0LLRg9C7LiDQr9GA0L7RgdC70LDQstCwINCc0YPQtNGA0L7Qs9C-LCA0OCwg0KTRg9GA0YHQuCwg0JrQuNGX0LLRgdGM0LrQsCDQvtCx0LvQsNGB0YLRjCwgMDkxNTA!5e0!3m2!1suk!2sua!4v1771408517827!5m2!1suk!2sua"
+                            width="100%" 
+                            height="200" 
+                            style="border:0;" 
+                            allowfullscreen="" 
+                            loading="lazy">
+                        </iframe>
+                    </div>
+                                        <p style="margin-top: 20px; font-size: 14px; color: #666;">
+                        Графік роботи:<br>Пн-Пт: 09:00 - 18:00<br>Сб-Нд: Вихідний
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="margin-bottom: 20px; color: var(--primary-color);">Форма звернення</h3>
+                    <form id="contact-form" onsubmit="return sendForm()">
+                        <div class="form-group">
+                            <label>Ваше ім'я <span style="color:red">*</span></label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email <span style="color:red">*</span></label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Повідомлення <span style="color:red">*</span></label>
+                            <textarea name="message" class="form-control" rows="6" required></textarea>
+                        </div>
+                        <p style="font-size: 12px; margin-bottom: 15px; color: #777;">
+                            Дані використовуються лише для зв'язку і не передаються третім особам.
+                        </p>
+                        <button type="submit" class="btn-base btn-main" style="width: 100%;">Відправити</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="copyright">
+                &copy; 2026 Комунальне підприємство «Бюро технічної інвентаризації». Всі права захищені.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        /* --- 1. МОБІЛЬНЕ МЕНЮ (Оновлено) --- */
+        function toggleMenu() {
+            const nav = document.getElementById('nav-menu');
+            const toggleBtn = document.querySelector('.mobile-toggle');
+            
+            // Перемикаємо клас відкриття
+            nav.classList.toggle('mobile-menu-open');
+            
+            // Змінюємо іконку
+            if (nav.classList.contains('mobile-menu-open')) {
+                toggleBtn.textContent = '✕';
+            } else {
+                toggleBtn.textContent = '☰';
+            }
+        }
+
+        // Закривати меню при кліку на посилання
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                const nav = document.getElementById('nav-menu');
+                nav.classList.remove('mobile-menu-open');
+                document.querySelector('.mobile-toggle').textContent = '☰';
+            });
+        });
+
+
+        function sendForm() {
+            alert('Повідомлення надіслано! Ми зв\'яжемося з вами найближчим часом.');
+            document.getElementById('contact-form').reset();
+            return false;
+        }
+    </script>
+    <script>
+    const API_URL = 'http://127.0.0.1:8000/api';
+
+    // 1. Завантаження тексту Hero
+    async function fetchHeroSettings() {
+        try {
+            const res = await fetch(`${API_URL}/settings/hero`);
+            const data = await res.json();
+            document.getElementById('hero-subtitle').innerHTML = data.subtitle;
+        } catch (e) { console.error("Помилка:", e); }
+    }
+
+    // 2. Завантаження FAQ
+    async function fetchFaqs() {
+        try {
+            const res = await fetch(`${API_URL}/faqs`);
+            const faqs = await res.json();
+            const wrapper = document.getElementById('faq-wrapper');
+            
+            let html = '';
+            faqs.forEach(f => {
+                html += `
+                <div class="faq-item">
+                    <div class="faq-question">${f.question}</div>
+                    <div class="faq-answer">
+                        <div class="faq-content-inner">${f.answer}</div>
+                    </div>
+                </div>`;
+            });
+            wrapper.innerHTML = html;
+
+            // Активуємо анімацію "Акордеон" після того, як HTML вставився
+            initAccordion();
+        } catch (e) { console.error("Помилка FAQ:", e); }
+    }
+
+    // 3. Логіка відкривання/закривання питань
+    function initAccordion() {
+        const faqItems = document.querySelectorAll('.faq-item');
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            const answer = item.querySelector('.faq-answer');
+            question.addEventListener('click', () => {
+                item.classList.toggle('active');
+                if (item.classList.contains('active')) {
+                    answer.style.maxHeight = answer.scrollHeight + "px";
+                } else {
+                    answer.style.maxHeight = null;
+                }
+            });
+        });
+    }
+
+    // Запускаємо все при старті
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchHeroSettings();
+        fetchFaqs();
+    });
+</script>
+<script src="contacts.js"></script>
+<script>
+        // Функція, яка забирає дані з нашого нового бекенду
+        async function fetchHeroSettings() {
+            try {
+                // Робимо запит до нашого FastAPI сервера
+                const response = await fetch('http://127.0.0.1:8000/api/settings/hero');
+                const data = await response.json();
+                
+                // Знаходимо абзац по id і вставляємо туди текст із сервера
+                document.getElementById('hero-subtitle').innerHTML = data.subtitle;
+            } catch (error) {
+                console.error("Помилка зв'язку з сервером:", error);
+                // Якщо сервер вимкнений, покажемо стандартний текст (щоб сайт не ламався)
+                document.getElementById('hero-subtitle').innerHTML = "З 1 березня переходимо на електронний документообіг.<br>Замовляйте послуги онлайн без черг.";
+            }
+        }
+
+        // Запускаємо функцію, щойно сторінка завантажиться
+        document.addEventListener('DOMContentLoaded', fetchHeroSettings);
+    </script>
+</body>
+</html>
