@@ -39,6 +39,13 @@ input:focus, textarea:focus { border-color: #0ea5e9; background: #fff; }
 .del-btn { background: #ef4444; padding: 8px 14px; font-size: 13px; float: right; margin-top: -2px; }
 .del-btn:hover { background: #dc2626; }
 
+/* Рядки для таблиці послуг */
+.price-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+.price-row input { margin-bottom: 0 !important; }
+.header-row input { font-weight: 700; background-color: #f1f5f9; color: #1e293b; }
+.col-name { flex: 2; }
+.col-price { flex: 1; }
+
 /* 5. СПИСКИ І ПАГІНАЦІЯ */
 .list-item { padding: 20px; border: 1px solid #e2e8f0; margin-bottom: 12px; border-radius: 8px; background: #fff; transition: 0.2s; }
 .list-item:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
