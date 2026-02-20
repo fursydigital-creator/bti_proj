@@ -315,7 +315,10 @@
     </footer>
 
 <script>
-        const API_URL = 'http://127.0.0.1:8000/api';
+        // Розумне визначення адреси API
+        const API_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
+            ? 'http://127.0.0.1:8000/api' 
+            : '/api';
 
         // --- 1. МОБІЛЬНЕ МЕНЮ ТА ФОРМА ---
         function toggleMenu() {
@@ -458,7 +461,7 @@
             fetchHeroSettings();
             fetchFaqs();
             fetchNews();
-            fetchDocuments();c
+            fetchDocuments();
         });
 
         async function fetchDocuments() {
