@@ -14,9 +14,14 @@ from datetime import datetime
 import urllib.request
 import urllib.parse
 import ssl
+import os
+from dotenv import load_dotenv
+
+# Завантажуємо секрети з файлу .env
+load_dotenv()
 
 # --- НАЛАШТУВАННЯ БЕЗПЕКИ (JWT) ---
-SECRET_KEY = "bti_super_secret_key_2026"
+SECRET_KEY = os.getenv("SECRET_KEY", "default_secret")
 ALGORITHM = "HS256"
 security = HTTPBearer()
 
@@ -28,8 +33,8 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Security(security))
         raise HTTPException(status_code=401, detail="Невірний або прострочений токен")
     
 # --- НАЛАШТУВАННЯ TELEGRAM ---
-TELEGRAM_BOT_TOKEN = "8524963043:AAEz2VDpcBtlR5V1FdkOiqMJhd8JWBOCiwU"
-TELEGRAM_CHAT_ID = "556963147"
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 def send_telegram_message(text: str):
     # 1. Виправили умову (залишили тільки перевірку на пустий токен)
@@ -109,8 +114,9 @@ class RequestCreate(BaseModel):
     name: str
     phone: str
     message: str = ""
-    class RequestStatusUpdate(BaseModel):
-        status: str
+
+class RequestStatusUpdate(BaseModel):
+    status: str
 
 Base.metadata.create_all(bind=engine)
 # Створюємо папку для картинок, якщо її немає
@@ -162,6 +168,8 @@ def get_single_news(news_id: int, db: Session = Depends(get_db)):
 # --- 4. МАРШРУТ АВТОРИЗАЦІЇ ---
 @app.post("/api/login")
 def login(data: LoginData):
+    correct_username = os.getenv("ADMIN_USERNAME")
+    correct_password = os.getenv("ADMIN_PASSWORD")
     if data.username == "admin" and data.password == "admin2026":
         token = jwt.encode({"sub": data.username}, SECRET_KEY, algorithm=ALGORITHM)
         return {"access_token": token}
@@ -317,12 +325,22 @@ def create_request(req: RequestCreate, db: Session = Depends(get_db)):
     db.add(new_req)
     db.commit()
 
-#Формуємо текст для Телеграму (з перевіркою, чи є повідомлення)
+    #Формуємо текст для Телеграму (з перевіркою, чи є повідомлення)
     msg_text = req.message if req.message else "Без повідомлення"
     msg = f"🔔 НОВА ЗАЯВКА З САЙТУ!\n\n👤 Ім'я: {req.name}\n📞 Телефон: {req.phone}\n💬 Текст: {msg_text}"
     send_telegram_message(msg)
 
     return {"message": "Заявку надіслано!"}
+
+# НОВИЙ ЗАХИЩЕНИЙ МАРШРУТ: ЗМІНА СТАТУСУ (Який був пропущений)
+@app.put("/api/requests/{req_id}/status")
+def update_request_status(req_id: int, data: RequestStatusUpdate, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
+    req_item = db.query(RequestItem).filter(RequestItem.id == req_id).first()
+    if req_item:
+        req_item.status = data.status
+        db.commit()
+        return {"message": "Статус оновлено"}
+    raise HTTPException(status_code=404, detail="Заявку не знайдено")
 
 # Захищений маршрут: адмінка отримує список заявок
 @app.get("/api/requests")
