@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Адмін-панель БТІ</title>
+    <title>Панель керування | БТІ Фурси</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
@@ -105,6 +105,7 @@
                 </div>
                 <div class="card">
                     <div id="faq-list">Завантаження...</div>
+                    <div id="faq-pagination" class="pagination"></div>
                 </div>
             </div>
 
@@ -426,6 +427,7 @@
                 const data = await res.json();
                 document.getElementById('hero-text').value = data.subtitle || '';
             } catch(e) { console.error("Помилка завантаження головного тексту", e); }
+            updateDashboardStats(); 
         }
 
         document.getElementById('hero-form').addEventListener('submit', async (e) => {
@@ -472,14 +474,52 @@
             } catch(e) { showStatus('Помилка оновлення', true); }
         });
 
+        let allFaqsData = [];
+        let currentFaqPage = 1;
+
         async function loadFaqs() {
             try {
                 const res = await fetch(`${API_URL}/faqs`);
-                const faqs = await res.json();
-                const list = document.getElementById('faq-list');
-                list.innerHTML = '';
-                faqs.forEach(f => { list.innerHTML += `<div class="list-item"><button class="action-btn del-btn" onclick="deleteFaq(${f.id})">Видалити</button><strong>${f.question}</strong><p>${f.answer}</p></div>`; });
-            } catch(e) { console.error("Помилка завантаження FAQ", e); }
+                allFaqsData = await res.json();
+                renderFaqPage(currentFaqPage);
+            } catch(e) { console.error("Помилка FAQ", e); }
+        }
+
+        function renderFaqPage(page) {
+            const totalPages = Math.ceil(allFaqsData.length / ITEMS_PER_PAGE);
+            if (page > totalPages && totalPages > 0) page = totalPages;
+            
+            currentFaqPage = page;
+            const list = document.getElementById('faq-list');
+            list.innerHTML = '';
+            
+            if (allFaqsData.length === 0) { list.innerHTML = '<p>FAQ порожній.</p>'; return; }
+            
+            const start = (page - 1) * ITEMS_PER_PAGE;
+            const pageItems = allFaqsData.slice(start, start + ITEMS_PER_PAGE);
+
+            pageItems.forEach(f => { 
+                list.innerHTML += `<div class="list-item">
+                    <button class="action-btn del-btn" onclick="deleteFaq(${f.id})">Видалити</button>
+                    <strong>${f.question}</strong><p style="margin-top: 10px; color: #555;">${f.answer}</p>
+                </div>`; 
+            });
+            renderPagination(allFaqsData.length, page, 'faq-pagination', renderFaqPage);
+        }
+        
+        document.getElementById('faq-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try { 
+                await fetchProtected(`${API_URL}/faqs`, { method: 'POST', body: JSON.stringify({ question: document.getElementById('faq-q').value, answer: document.getElementById('faq-a').value }) }); 
+                document.getElementById('faq-q').value = ''; document.getElementById('faq-a').value = ''; 
+                showStatus('Питання додано!'); loadFaqs(); 
+            } catch(e) {}
+        });
+        
+        async function deleteFaq(id) { 
+            if(confirm("Точно видалити?")) { 
+                try { await fetchProtected(`${API_URL}/faqs/${id}`, { method: 'DELETE' }); showStatus('Видалено!'); loadFaqs(); } catch(e) {} 
+            } 
         }
         
         document.getElementById('faq-form').addEventListener('submit', async (e) => {
@@ -795,26 +835,30 @@
                 const msgDisplay = r.message ? r.message : '<em>Клієнт не залишив повідомлення</em>';
                 const borderColor = getStatusColor(r.status || 'Нова');
                 
-                list.innerHTML += `<div class="list-item" style="border-left: 5px solid ${borderColor}; position: relative;">
-                    
-                    <div style="position: absolute; right: 20px; top: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
-                        <select onchange="updateRequestStatus(${r.id}, this.value)" style="margin: 0; padding: 6px 10px; width: auto; font-weight: 600; border-color: ${borderColor}; cursor: pointer;">
-                            <option value="Нова" ${r.status === 'Нова' || !r.status ? 'selected' : ''}>🔵 Нова</option>
-                            <option value="В роботі" ${r.status === 'В роботі' ? 'selected' : ''}>🟠 В роботі</option>
-                            <option value="Завершено" ${r.status === 'Завершено' ? 'selected' : ''}>🟢 Завершено</option>
-                            <option value="Відмова" ${r.status === 'Відмова' ? 'selected' : ''}>🔴 Відмова</option>
-                        </select>
-                        <button class="action-btn del-btn" style="margin: 0; float: none;" onclick="deleteRequest(${r.id})">Видалити</button>
-                    </div>
-
-                    <div style="padding-right: 250px;">
-                        <strong style="font-size: 16px;">${r.name}</strong> 
-                        <span style="color:#64748b; font-size:13px; margin-left: 10px;">🕒 ${r.date_str}</span><br>
-                        <div style="margin-top: 5px;">
-                            <span style="font-size: 15px; font-weight: 500;">📞 <a href="tel:${r.phone}" style="color: #0f172a; text-decoration: none;">${r.phone}</a></span>
+                list.innerHTML += `<div class="list-item" style="border-left: 5px solid ${borderColor};">
+                    <div class="req-card">
+                        
+                        <div class="req-info">
+                            <strong style="font-size: 16px;">${r.name}</strong> 
+                            <span style="color:#64748b; font-size:13px; margin-left: 10px;">🕒 ${r.date_str}</span>
+                            <div style="margin-top: 8px;">
+                                <span style="font-size: 15px; font-weight: 500;">📞 <a href="tel:${r.phone}" style="color: #0f172a; text-decoration: none;">${r.phone}</a></span>
+                            </div>
                         </div>
-                        <p style="margin-top: 12px; font-size: 15px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 0;">${msgDisplay}</p>
+
+                        <div class="req-controls">
+                            <select onchange="updateRequestStatus(${r.id}, this.value)" style="padding: 8px 10px; font-weight: 600; border-color: ${borderColor}; border-width: 2px; cursor: pointer; border-radius: 6px; outline: none; background: #fff;">
+                                <option value="Нова" ${r.status === 'Нова' || !r.status ? 'selected' : ''}>🔵 Нова</option>
+                                <option value="В роботі" ${r.status === 'В роботі' ? 'selected' : ''}>🟠 В роботі</option>
+                                <option value="Завершено" ${r.status === 'Завершено' ? 'selected' : ''}>🟢 Завершено</option>
+                                <option value="Відмова" ${r.status === 'Відмова' ? 'selected' : ''}>🔴 Відмова</option>
+                            </select>
+                            <button class="action-btn del-btn" onclick="deleteRequest(${r.id})">Видалити</button>
+                        </div>
+
                     </div>
+                    
+                    <p style="margin-top: 15px; font-size: 15px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 0;">${msgDisplay}</p>
                 </div>`;
             });
 

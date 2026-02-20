@@ -54,6 +54,10 @@ input:focus, textarea:focus { border-color: #0ea5e9; background: #fff; }
 .page-btn { padding: 8px 14px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; border-radius: 6px; font-weight: 600; color: #475569; transition: 0.2s; }
 .page-btn.active { background: #0ea5e9; color: #fff; border-color: #0ea5e9; }
 .page-btn:hover:not(.active) { background: #f1f5f9; color: #0ea5e9; }
+/* Структура для карток заявок (CRM) */
+.req-card { display: flex; justify-content: space-between; gap: 15px; align-items: flex-start; }
+.req-info { flex: 1; }
+.req-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
 /* 6. ПЛАГІНИ (ТАБЛИЦІ ТА РЕДАКТОР) */
 #hot-container { margin-bottom: 25px; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; z-index: 0; position: relative; }
@@ -66,12 +70,19 @@ input:focus, textarea:focus { border-color: #0ea5e9; background: #fff; }
 /* --- АДАПТАЦІЯ ПІД МОБІЛЬНІ ПРИСТРОЇ (МЕНШЕ 768px) --- */
 /* ========================================================= */
 @media (max-width: 768px) {
-    .sidebar { width: 100%; height: auto; position: sticky; top: 0; padding: 10px; flex-direction: row; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 100; }
+    .sidebar { 
+        width: 100%; height: auto; position: relative; padding: 15px; 
+        display: grid; grid-template-columns: 1fr 1fr; gap: 8px; /* 2 колонки кнопок */
+        box-shadow: none; border-bottom: 2px solid #e2e8f0; z-index: 10;
+    }
     .sidebar h2 { display: none; }
-    .sidebar button { display: inline-block; width: auto; margin-bottom: 0; margin-right: 8px; padding: 10px 15px; flex-shrink: 0; border-radius: 20px; }
-    .sidebar button:hover, .sidebar button.active { padding-left: 15px; }
-    .logout-btn { margin-top: 0; margin-left: auto; border-radius: 20px !important; }
-    
+    .sidebar button { 
+        width: 100%; margin: 0; padding: 12px 5px; font-size: 13px; 
+        text-align: center; border-radius: 8px; 
+    }
+    .sidebar button:hover, .sidebar button.active { padding-left: 5px; } /* Скидаємо відступ */
+    .logout-btn { grid-column: span 2; border-radius: 8px !important; margin-top: 10px; }
+
     .main-content { margin-left: 0; padding: 15px; width: 100%; }
     h1 { font-size: 24px; }
     .card { padding: 20px 15px; }
@@ -84,4 +95,13 @@ input:focus, textarea:focus { border-color: #0ea5e9; background: #fff; }
     div[style*="display: flex; gap: 10px;"] button { width: 100% !important; }
     
     #hot-container { overflow-x: auto; }
+    /* Адаптація заявок під телефон */
+    .req-card { flex-direction: column; }
+    .req-controls { width: 100%; flex-direction: column; align-items: stretch; margin-top: 10px; }
+    .req-controls select, .req-controls button { width: 100%; margin: 0 !important; text-align: center; }
 }
+/* Відновлення списків для текстового редактора */
+.ql-editor ul, .ql-editor ol { padding-left: 20px; }
+.ql-editor ul { list-style-type: disc; }
+.ql-editor ol { list-style-type: decimal; }
+.ql-editor li { margin-bottom: 5px; display: list-item; }
