@@ -14,9 +14,18 @@ from datetime import datetime
 import urllib.request
 import urllib.parse
 import ssl
-from dotenv import load_dotenv, set_key
 from PIL import Image
 import io
+from datetime import datetime, timedelta
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
 
 # Завантажуємо секрети з файлу .env і ПРИМУСОВО перезаписуємо пам'ять
 load_dotenv(override=True)
@@ -38,20 +47,14 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 def send_telegram_message(text: str):
-    if not TELEGRAM_BOT_TOKEN:
-        return 
-        
+    if not TELEGRAM_BOT_TOKEN: return 
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     data = urllib.parse.urlencode({'chat_id': TELEGRAM_CHAT_ID, 'text': text}).encode('utf-8')
-    
-    ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
-    
     try:
-        urllib.request.urlopen(url, data=data, context=ctx)
+        req = urllib.request.Request(url, data=data)
+        urllib.request.urlopen(req) # Безпечний виклик з перевіркою SSL
     except Exception as e:
-        print("Помилка відправки в Telegram:", e)
+        print("Помилка Telegram:", e)
 
 # --- 1. БАЗА ДАНИХ ---
 SQLALCHEMY_DATABASE_URL = "sqlite:///./bti.db"
@@ -131,72 +134,96 @@ class DocumentCreate(BaseModel): title: str; file_type: str; file_url: str
 
 # --- 4. МАРШРУТ АВТОРИЗАЦІЇ ТА БЕЗПЕКИ ---
 @app.post("/api/login")
-def login(data: LoginData):
-    correct_username = os.getenv("ADMIN_USERNAME", "admin")
-    correct_password = os.getenv("ADMIN_PASSWORD", "admin2026")
+def login(data: LoginData, db: Session = Depends(get_db)):
+    # Шукаємо логін і пароль у базі даних
+    db_username = db.query(Setting).filter(Setting.key == "admin_username").first()
+    db_password = db.query(Setting).filter(Setting.key == "admin_password_hash").first()
+
+    # Якщо в базі ще пусто, беремо резервні з .env або за замовчуванням
+    correct_username = db_username.value if db_username else os.getenv("ADMIN_USERNAME", "admin")
     
-    if data.username == correct_username and data.password == correct_password:
-        token = jwt.encode({"sub": data.username}, SECRET_KEY, algorithm=ALGORITHM)
+    # Перевіряємо пароль (хеш з БД або звичайний з .env для першого входу)
+    if db_password:
+        is_valid = verify_password(data.password, db_password.value)
+    else:
+        fallback_password = os.getenv("ADMIN_PASSWORD", "admin2026")
+        is_valid = (data.password == fallback_password)
+
+    if data.username == correct_username and is_valid:
+        # JWT токен живе рівно 24 години
+        expire = datetime.utcnow() + timedelta(hours=24)
+        token = jwt.encode({"sub": data.username, "exp": expire}, SECRET_KEY, algorithm=ALGORITHM)
         return {"access_token": token}
     raise HTTPException(status_code=401, detail="Невірний логін або пароль")
 
+@app.post("/api/upload/document")
+def upload_document_file(file: UploadFile = File(...), token: dict = Depends(verify_token)):
+    ext = file.filename.split(".")[-1]
+    unique_filename = f"{uuid.uuid4().hex}.{ext}"
+    file_path = f"uploads/{unique_filename}"
+    with open(file_path, "wb") as buffer: 
+        shutil.copyfileobj(file.file, buffer)
+    return {"url": f"/uploads/{unique_filename}"} # Відразу відносний шлях!
+
 @app.post("/api/admin/credentials")
-def update_credentials(data: CredentialsUpdate, token: dict = Depends(verify_token)):
-    correct_password = os.getenv("ADMIN_PASSWORD", "admin2026")
-    if data.current_password != correct_password:
-        raise HTTPException(status_code=400, detail="Невірний поточний пароль")
+def update_credentials(data: CredentialsUpdate, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
+    db_password = db.query(Setting).filter(Setting.key == "admin_password_hash").first()
     
-    env_path = ".env"
-    set_key(env_path, "ADMIN_USERNAME", data.new_username)
-    set_key(env_path, "ADMIN_PASSWORD", data.new_password)
+    # Перевірка поточного пароля
+    if db_password:
+        if not verify_password(data.current_password, db_password.value):
+            raise HTTPException(status_code=400, detail="Невірний поточний пароль")
+    else:
+        if data.current_password != os.getenv("ADMIN_PASSWORD", "admin2026"):
+            raise HTTPException(status_code=400, detail="Невірний поточний пароль")
+
+    # Хешуємо новий пароль
+    hashed_new = get_password_hash(data.new_password)
     
-    os.environ["ADMIN_USERNAME"] = data.new_username
-    os.environ["ADMIN_PASSWORD"] = data.new_password
-    
-    return {"message": "Дані для входу успішно оновлено!"}
+    # Зберігаємо новий логін в БД
+    uname_setting = db.query(Setting).filter(Setting.key == "admin_username").first()
+    if uname_setting: uname_setting.value = data.new_username
+    else: db.add(Setting(key="admin_username", value=data.new_username))
+
+    # Зберігаємо новий хеш пароля в БД
+    pass_setting = db.query(Setting).filter(Setting.key == "admin_password_hash").first()
+    if pass_setting: pass_setting.value = hashed_new
+    else: db.add(Setting(key="admin_password_hash", value=hashed_new))
+
+    db.commit()
+    return {"message": "Дані для входу безпечно оновлено!"}
 
 # --- 5. ВІДКРИТІ МАРШРУТИ (ДЛЯ САЙТУ) ---
 @app.get("/sitemap.xml")
 def get_sitemap(db: Session = Depends(get_db)):
-    # ВАЖЛИВО: Замініть це на ваш реальний домен, коли викладете сайт в інтернет
-    base_url = "https://vash-domen.com.ua" 
+    base_url = "https://bti-fursy.com.ua" # Ваш майбутній домен
+    urls = []
     
-    # 1. Список усіх ваших статичних сторінок послуг
-    urls = [
-        f"{base_url}/",
-        f"{base_url}/news.html",
-        f"{base_url}/ocinka.html",
-        f"{base_url}/tehnichne-obstezhennya.html",
-        f"{base_url}/budivelnyi-pasport.html",
-        f"{base_url}/perevedennya-dachnogo.html",
-        f"{base_url}/tehpasport-budynok.html",
-        f"{base_url}/tehpasport-kvartyra.html",
-        f"{base_url}/tehpasport-nezhyle.html",
-        f"{base_url}/tehpasport-vyrobnychi.html",
-        f"{base_url}/tehpasport-garazh.html",
-        f"{base_url}/tehpasport-dacha.html",
-        f"{base_url}/tehpasport-pereplanuvannya-budynok.html",
-        f"{base_url}/tehpasport-pereplanuvannya-kvartyra.html",
-        f"{base_url}/tehpasport-pereplanuvannya-nezhyle.html",
-        f"{base_url}/tehpasport-pereplanuvannya-vyrobnychi.html",
-        f"{base_url}/tehpasport-vvedennya.html",
-    ]
+    # 1. Автоматично скануємо папку frontend на наявність .html файлів
+    frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend"))
     
-    # 2. Автоматично додаємо всі новини з бази даних
+    if os.path.exists(frontend_dir):
+        for file in os.listdir(frontend_dir):
+            if file.endswith(".html") and file != "article.html": # article.html - це шаблон
+                if file == "index.html":
+                    urls.append(f"{base_url}/")
+                else:
+                    urls.append(f"{base_url}/{file}")
+    else:
+        urls.append(f"{base_url}/") # На випадок, якщо шляхи зміняться
+
+    # 2. Автоматично додаємо всі новини з БД
     news = db.query(NewsItem).all()
     for n in news:
         urls.append(f"{base_url}/article.html?id={n.id}")
         
-    # 3. Формуємо правильний XML-документ для Google
+    # 3. Збираємо XML
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    
     for url in urls:
         xml += f"  <url>\n    <loc>{url}</loc>\n  </url>\n"
-        
     xml += '</urlset>'
     
-    # Повертаємо це як справжній XML-файл, а не просто текст
     return Response(content=xml, media_type="application/xml")
 
 @app.get("/api/settings/hero")

@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
     try {
         // Звертаємось до нашої бази даних (поки що на локальному сервері)
-        const response = await fetch('http://127.0.0.1:8000/api/settings');
+        const response = await fetch('/api/settings');
         
         if (!response.ok) {
             throw new Error("Помилка завантаження контактів з API");
