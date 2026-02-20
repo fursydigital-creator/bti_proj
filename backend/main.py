@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Security, UploadFile, File
+from fastapi import FastAPI, Depends, HTTPException, Security, UploadFile, File, Response
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -14,14 +14,15 @@ from datetime import datetime
 import urllib.request
 import urllib.parse
 import ssl
-import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv, set_key
+from PIL import Image
+import io
 
-# Завантажуємо секрети з файлу .env
-load_dotenv()
+# Завантажуємо секрети з файлу .env і ПРИМУСОВО перезаписуємо пам'ять
+load_dotenv(override=True)
 
 # --- НАЛАШТУВАННЯ БЕЗПЕКИ (JWT) ---
-SECRET_KEY = os.getenv("SECRET_KEY", "default_secret")
+SECRET_KEY = os.getenv("SECRET_KEY", "bti_super_secret_key_2026")
 ALGORITHM = "HS256"
 security = HTTPBearer()
 
@@ -37,20 +38,17 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 def send_telegram_message(text: str):
-    # 1. Виправили умову (залишили тільки перевірку на пустий токен)
     if not TELEGRAM_BOT_TOKEN:
         return 
         
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     data = urllib.parse.urlencode({'chat_id': TELEGRAM_CHAT_ID, 'text': text}).encode('utf-8')
     
-    # 2. Створюємо контекст для ігнорування SSL
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
     
     try:
-        # 3. ДОДАЛИ context=ctx ОСЬ СЮДИ:
         urllib.request.urlopen(url, data=data, context=ctx)
     except Exception as e:
         print("Помилка відправки в Telegram:", e)
@@ -81,26 +79,23 @@ class Service(Base):
     title = Column(String)
     table_data = Column(JSON)
 
-# НОВА МОДЕЛЬ: НОВИНИ
 class NewsItem(Base):
     __tablename__ = "news"
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String)
-    date_str = Column(String)      # Напр. "15.03.2026"
-    tag = Column(String)           # Напр. "Новина", "Порада"
-    image_url = Column(String)     # Посилання на картинку
-    preview = Column(String)       # Короткий текст для картки на головній
-    content = Column(String)       # Повний HTML текст статті з редактора
+    date_str = Column(String)     
+    tag = Column(String)          
+    image_url = Column(String)    
+    preview = Column(String)      
+    content = Column(String)      
 
-# МОДЕЛЬ ДЛЯ ДОКУМЕНТІВ
 class DocumentItem(Base):
     __tablename__ = "documents"
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)         # Напр. "Заява на інвентаризацію"
-    file_type = Column(String)     # Напр. "PDF файл" або "DOCX документ"
-    file_url = Column(String)      # Посилання на файл
+    title = Column(String)         
+    file_type = Column(String)     
+    file_url = Column(String)      
 
-# МОДЕЛЬ ДЛЯ ЗАЯВОК (ЛІДІВ)
 class RequestItem(Base):
     __tablename__ = "requests"
     id = Column(Integer, primary_key=True, index=True)
@@ -110,24 +105,12 @@ class RequestItem(Base):
     date_str = Column(String)
     status = Column(String, default="Нова")
 
-class RequestCreate(BaseModel):
-    name: str
-    phone: str
-    message: str = ""
-
-class RequestStatusUpdate(BaseModel):
-    status: str
-
 Base.metadata.create_all(bind=engine)
-# Створюємо папку для картинок, якщо її немає
 os.makedirs("uploads", exist_ok=True)
-
-
 
 # --- 3. НАЛАШТУВАННЯ FASTAPI ---
 app = FastAPI(title="BTI Admin API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
-# Дозволяємо браузеру читати файли з папки uploads
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 def get_db():
@@ -140,42 +123,82 @@ class LoginData(BaseModel): username: str; password: str
 class HeroUpdate(BaseModel): subtitle: str
 class FAQCreate(BaseModel): question: str; answer: str
 class ServiceUpdate(BaseModel): title: str; table_data: List[List[str]]
+class RequestCreate(BaseModel): name: str; phone: str; message: str = ""
+class RequestStatusUpdate(BaseModel): status: str
+class CredentialsUpdate(BaseModel): current_password: str; new_username: str; new_password: str
+class NewsCreate(BaseModel): title: str; date_str: str; tag: str; image_url: str; preview: str; content: str
+class DocumentCreate(BaseModel): title: str; file_type: str; file_url: str
 
-
-
-# СХЕМА ДЛЯ НОВИН
-class NewsCreate(BaseModel):
-    title: str
-    date_str: str
-    tag: str
-    image_url: str
-    preview: str
-    content: str
-
-class DocumentCreate(BaseModel):
-    title: str
-    file_type: str
-    file_url: str
-
-# Отримання однієї конкретної новини за ID (відкритий маршрут)
-@app.get("/api/news/{news_id}")
-def get_single_news(news_id: int, db: Session = Depends(get_db)):
-    item = db.query(NewsItem).filter(NewsItem.id == news_id).first()
-    if not item:
-        raise HTTPException(status_code=404, detail="Новину не знайдено")
-    return item
-
-# --- 4. МАРШРУТ АВТОРИЗАЦІЇ ---
+# --- 4. МАРШРУТ АВТОРИЗАЦІЇ ТА БЕЗПЕКИ ---
 @app.post("/api/login")
 def login(data: LoginData):
-    correct_username = os.getenv("ADMIN_USERNAME")
-    correct_password = os.getenv("ADMIN_PASSWORD")
-    if data.username == "admin" and data.password == "admin2026":
+    correct_username = os.getenv("ADMIN_USERNAME", "admin")
+    correct_password = os.getenv("ADMIN_PASSWORD", "admin2026")
+    
+    if data.username == correct_username and data.password == correct_password:
         token = jwt.encode({"sub": data.username}, SECRET_KEY, algorithm=ALGORITHM)
         return {"access_token": token}
     raise HTTPException(status_code=401, detail="Невірний логін або пароль")
 
+@app.post("/api/admin/credentials")
+def update_credentials(data: CredentialsUpdate, token: dict = Depends(verify_token)):
+    correct_password = os.getenv("ADMIN_PASSWORD", "admin2026")
+    if data.current_password != correct_password:
+        raise HTTPException(status_code=400, detail="Невірний поточний пароль")
+    
+    env_path = ".env"
+    set_key(env_path, "ADMIN_USERNAME", data.new_username)
+    set_key(env_path, "ADMIN_PASSWORD", data.new_password)
+    
+    os.environ["ADMIN_USERNAME"] = data.new_username
+    os.environ["ADMIN_PASSWORD"] = data.new_password
+    
+    return {"message": "Дані для входу успішно оновлено!"}
+
 # --- 5. ВІДКРИТІ МАРШРУТИ (ДЛЯ САЙТУ) ---
+@app.get("/sitemap.xml")
+def get_sitemap(db: Session = Depends(get_db)):
+    # ВАЖЛИВО: Замініть це на ваш реальний домен, коли викладете сайт в інтернет
+    base_url = "https://vash-domen.com.ua" 
+    
+    # 1. Список усіх ваших статичних сторінок послуг
+    urls = [
+        f"{base_url}/",
+        f"{base_url}/news.html",
+        f"{base_url}/ocinka.html",
+        f"{base_url}/tehnichne-obstezhennya.html",
+        f"{base_url}/budivelnyi-pasport.html",
+        f"{base_url}/perevedennya-dachnogo.html",
+        f"{base_url}/tehpasport-budynok.html",
+        f"{base_url}/tehpasport-kvartyra.html",
+        f"{base_url}/tehpasport-nezhyle.html",
+        f"{base_url}/tehpasport-vyrobnychi.html",
+        f"{base_url}/tehpasport-garazh.html",
+        f"{base_url}/tehpasport-dacha.html",
+        f"{base_url}/tehpasport-pereplanuvannya-budynok.html",
+        f"{base_url}/tehpasport-pereplanuvannya-kvartyra.html",
+        f"{base_url}/tehpasport-pereplanuvannya-nezhyle.html",
+        f"{base_url}/tehpasport-pereplanuvannya-vyrobnychi.html",
+        f"{base_url}/tehpasport-vvedennya.html",
+    ]
+    
+    # 2. Автоматично додаємо всі новини з бази даних
+    news = db.query(NewsItem).all()
+    for n in news:
+        urls.append(f"{base_url}/article.html?id={n.id}")
+        
+    # 3. Формуємо правильний XML-документ для Google
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    
+    for url in urls:
+        xml += f"  <url>\n    <loc>{url}</loc>\n  </url>\n"
+        
+    xml += '</urlset>'
+    
+    # Повертаємо це як справжній XML-файл, а не просто текст
+    return Response(content=xml, media_type="application/xml")
+
 @app.get("/api/settings/hero")
 def get_hero_text(db: Session = Depends(get_db)):
     setting = db.query(Setting).filter(Setting.key == "hero_subtitle").first()
@@ -190,11 +213,36 @@ def get_service(slug: str, db: Session = Depends(get_db)):
     if service: return {"slug": service.slug, "title": service.title, "table_data": service.table_data}
     return {"slug": slug, "title": "Нова послуга", "table_data": [["Послуга", "Ціна"]]}
 
-# Отримання списку новин (сортуємо від найновіших)
 @app.get("/api/news")
 def get_news(db: Session = Depends(get_db)):
     return db.query(NewsItem).order_by(NewsItem.id.desc()).all()
 
+@app.get("/api/news/{news_id}")
+def get_single_news(news_id: int, db: Session = Depends(get_db)):
+    item = db.query(NewsItem).filter(NewsItem.id == news_id).first()
+    if not item: raise HTTPException(status_code=404, detail="Новину не знайдено")
+    return item
+
+@app.get("/api/settings")
+def get_all_settings(db: Session = Depends(get_db)):
+    all_s = db.query(Setting).all()
+    return {s.key: s.value for s in all_s}
+
+@app.get("/api/documents")
+def get_documents(db: Session = Depends(get_db)):
+    return db.query(DocumentItem).all()
+
+@app.post("/api/requests")
+def create_request(req: RequestCreate, db: Session = Depends(get_db)):
+    now = datetime.now().strftime("%d.%m.%Y %H:%M")
+    new_req = RequestItem(name=req.name, phone=req.phone, message=req.message, date_str=now, status="Нова")
+    db.add(new_req)
+    db.commit()
+
+    msg_text = req.message if req.message else "Без повідомлення"
+    msg = f"🔔 НОВА ЗАЯВКА З САЙТУ!\n\n👤 Ім'я: {req.name}\n📞 Телефон: {req.phone}\n💬 Текст: {msg_text}"
+    send_telegram_message(msg)
+    return {"message": "Заявку надіслано!"}
 
 
 # --- 6. ЗАХИЩЕНІ МАРШРУТИ (ДЛЯ АДМІНКИ) ---
@@ -220,14 +268,11 @@ def delete_faq(faq_id: int, db: Session = Depends(get_db), token: dict = Depends
 @app.post("/api/services/{slug}")
 def update_service(slug: str, data: ServiceUpdate, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
     service = db.query(Service).filter(Service.slug == slug).first()
-    if service:
-        service.title = data.title; service.table_data = data.table_data
-    else:
-        db.add(Service(slug=slug, title=data.title, table_data=data.table_data))
+    if service: service.title = data.title; service.table_data = data.table_data
+    else: db.add(Service(slug=slug, title=data.title, table_data=data.table_data))
     db.commit()
     return {"message": "Таблицю успішно збережено!"}
 
-# Додавання нової статті
 @app.post("/api/news")
 def create_news(news: NewsCreate, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
     new_item = NewsItem(**news.dict())
@@ -235,70 +280,54 @@ def create_news(news: NewsCreate, db: Session = Depends(get_db), token: dict = D
     db.commit()
     return {"message": "Новину успішно опубліковано!"}
 
-# Видалення статті
+@app.put("/api/news/{news_id}")
+def update_news(news_id: int, news: NewsCreate, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
+    item = db.query(NewsItem).filter(NewsItem.id == news_id).first()
+    if not item: raise HTTPException(status_code=404, detail="Новину не знайдено")
+    item.title = news.title; item.date_str = news.date_str; item.tag = news.tag; item.image_url = news.image_url; item.preview = news.preview; item.content = news.content
+    db.commit()
+    return {"message": "Новину успішно оновлено!"}
+
 @app.delete("/api/news/{news_id}")
 def delete_news(news_id: int, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
     news_item = db.query(NewsItem).filter(NewsItem.id == news_id).first()
     if news_item: db.delete(news_item); db.commit()
     return {"message": "Новину видалено"}
 
-# Схема для масового оновлення налаштувань
-class SettingsUpdate(BaseModel):
-    settings: dict  # Прийматиме об'єкт типу {"address": "...", "phone1_raw": "..."}
-
-# Отримання всіх налаштувань (відкритий маршрут)
-@app.get("/api/settings")
-def get_all_settings(db: Session = Depends(get_db)):
-    all_s = db.query(Setting).all()
-    return {s.key: s.value for s in all_s}
-
-# Масове оновлення налаштувань (захищений маршрут)
+class SettingsUpdate(BaseModel): settings: dict
 @app.post("/api/settings/bulk-update")
 def bulk_update_settings(data: SettingsUpdate, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
     for key, value in data.settings.items():
         setting = db.query(Setting).filter(Setting.key == key).first()
-        if setting:
-            setting.value = value
-        else:
-            db.add(Setting(key=key, value=value))
+        if setting: setting.value = value
+        else: db.add(Setting(key=key, value=value))
     db.commit()
     return {"message": "Налаштування оновлено"}
 
-# --- ЗАВАНТАЖЕННЯ КАРТИНОК ---
 @app.post("/api/upload")
 def upload_file(file: UploadFile = File(...), token: dict = Depends(verify_token)):
-    # Генеруємо унікальне ім'я (щоб файли не перезаписували один одного)
-    ext = file.filename.split(".")[-1]
-    unique_filename = f"{uuid.uuid4().hex}.{ext}"
-    file_path = f"uploads/{unique_filename}"
-    
-    # Зберігаємо файл
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    try:
+        # Читаємо файл у пам'ять
+        image_data = file.file.read()
+        image = Image.open(io.BytesIO(image_data))
         
-    # Повертаємо готове посилання на картинку
-    return {"url": f"http://127.0.0.1:8000/uploads/{unique_filename}"}
-
-# --- ОНОВЛЕННЯ ІСНУЮЧОЇ НОВИНИ ---
-@app.put("/api/news/{news_id}")
-def update_news(news_id: int, news: NewsCreate, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
-    item = db.query(NewsItem).filter(NewsItem.id == news_id).first()
-    if not item: raise HTTPException(status_code=404, detail="Новину не знайдено")
-    
-    item.title = news.title
-    item.date_str = news.date_str
-    item.tag = news.tag
-    item.image_url = news.image_url
-    item.preview = news.preview
-    item.content = news.content
-    
-    db.commit()
-    return {"message": "Новину успішно оновлено!"}
-# --- ДОКУМЕНТИ ДЛЯ ЗАВАНТАЖЕННЯ ---
-
-@app.get("/api/documents")
-def get_documents(db: Session = Depends(get_db)):
-    return db.query(DocumentItem).all()
+        # Якщо картинка має прозорий фон (PNG) або інший формат, 
+        # конвертуємо її в стандартний RGB для правильного стиснення
+        if image.mode in ("RGBA", "P"):
+            image = image.convert("RGB")
+            
+        # Завжди зберігаємо у форматі .webp
+        unique_filename = f"{uuid.uuid4().hex}.webp"
+        file_path = f"uploads/{unique_filename}"
+        
+        # Стискаємо з якістю 80% (ідеальний баланс ваги/якості)
+        image.save(file_path, "WEBP", quality=80, method=4)
+        
+        return {"url": f"http://127.0.0.1:8000/uploads/{unique_filename}"}
+        
+    except Exception as e:
+        print("Помилка обробки фото:", e)
+        raise HTTPException(status_code=400, detail="Не вдалося обробити картинку")
 
 @app.post("/api/documents")
 def create_document(doc: DocumentCreate, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
@@ -310,29 +339,13 @@ def create_document(doc: DocumentCreate, db: Session = Depends(get_db), token: d
 @app.delete("/api/documents/{doc_id}")
 def delete_document(doc_id: int, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
     doc_item = db.query(DocumentItem).filter(DocumentItem.id == doc_id).first()
-    if doc_item:
-        db.delete(doc_item)
-        db.commit()
+    if doc_item: db.delete(doc_item); db.commit()
     return {"message": "Документ видалено"}
 
-# --- ЗАЯВКИ З САЙТУ (CRM) ---
+@app.get("/api/requests")
+def get_requests(db: Session = Depends(get_db), token: dict = Depends(verify_token)):
+    return db.query(RequestItem).order_by(RequestItem.id.desc()).all()
 
-# Відкритий маршрут: сайт відправляє заявку
-@app.post("/api/requests")
-def create_request(req: RequestCreate, db: Session = Depends(get_db)):
-    now = datetime.now().strftime("%d.%m.%Y %H:%M")
-    new_req = RequestItem(name=req.name, phone=req.phone, message=req.message, date_str=now, status="Нова")
-    db.add(new_req)
-    db.commit()
-
-    #Формуємо текст для Телеграму (з перевіркою, чи є повідомлення)
-    msg_text = req.message if req.message else "Без повідомлення"
-    msg = f"🔔 НОВА ЗАЯВКА З САЙТУ!\n\n👤 Ім'я: {req.name}\n📞 Телефон: {req.phone}\n💬 Текст: {msg_text}"
-    send_telegram_message(msg)
-
-    return {"message": "Заявку надіслано!"}
-
-# НОВИЙ ЗАХИЩЕНИЙ МАРШРУТ: ЗМІНА СТАТУСУ (Який був пропущений)
 @app.put("/api/requests/{req_id}/status")
 def update_request_status(req_id: int, data: RequestStatusUpdate, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
     req_item = db.query(RequestItem).filter(RequestItem.id == req_id).first()
@@ -342,16 +355,8 @@ def update_request_status(req_id: int, data: RequestStatusUpdate, db: Session = 
         return {"message": "Статус оновлено"}
     raise HTTPException(status_code=404, detail="Заявку не знайдено")
 
-# Захищений маршрут: адмінка отримує список заявок
-@app.get("/api/requests")
-def get_requests(db: Session = Depends(get_db), token: dict = Depends(verify_token)):
-    return db.query(RequestItem).order_by(RequestItem.id.desc()).all()
-
-# Захищений маршрут: видалення заявки
 @app.delete("/api/requests/{req_id}")
 def delete_request(req_id: int, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
     req_item = db.query(RequestItem).filter(RequestItem.id == req_id).first()
-    if req_item:
-        db.delete(req_item)
-        db.commit()
+    if req_item: db.delete(req_item); db.commit()
     return {"message": "Заявку видалено"}

@@ -47,6 +47,24 @@
                         <button type="submit" class="action-btn" style="width: auto;">Зберегти</button>
                     </form>
                 </div>
+                <div class="card" style="border-left: 4px solid #ef4444;">
+                    <h3 style="color: #ef4444;">🔒 Безпека (Дані для входу)</h3>
+                    
+                    <div style="max-width: 400px;">
+                        <label>Поточний пароль (для підтвердження) <span style="color:red">*</span></label>
+                        <input type="password" id="sec-current-password" placeholder="Введіть ваш поточний пароль">
+                        
+                        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+                        
+                        <label>Новий логін</label>
+                        <input type="text" id="sec-new-username" placeholder="Придумайте новий логін">
+                        
+                        <label>Новий пароль</label>
+                        <input type="password" id="sec-new-password" placeholder="Придумайте новий пароль">
+                        
+                        <button class="action-btn" style="background: #ef4444; width: 100%; margin-top: 10px;" onclick="updateAdminCredentials()">Зберегти нові дані</button>
+                    </div>
+                </div>
             </div>
 
             <div id="tab-faq" class="tab-content">
@@ -296,7 +314,41 @@
             
             return response;
         }
+        
+        // --- ЗМІНА ЛОГІНУ ТА ПАРОЛЮ ---
+        async function updateAdminCredentials() {
+            const current_password = document.getElementById('sec-current-password').value;
+            const new_username = document.getElementById('sec-new-username').value;
+            const new_password = document.getElementById('sec-new-password').value;
 
+            // Перевіряємо, чи всі поля заповнені
+            if (!current_password || !new_username || !new_password) {
+                showStatus('Будь ласка, заповніть всі 3 поля', true);
+                return;
+            }
+
+            try {
+                // Відправляємо запит на сервер
+                const res = await fetchProtected(`${API_URL}/admin/credentials`, {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        current_password: current_password, 
+                        new_username: new_username, 
+                        new_password: new_password 
+                    })
+                });
+                
+                showStatus('Дані для входу успішно змінено!');
+                
+                // Очищаємо поля після успішної зміни
+                document.getElementById('sec-current-password').value = '';
+                document.getElementById('sec-new-password').value = '';
+                
+            } catch (e) {
+                showStatus('Помилка! Можливо, ви ввели неправильний старий пароль.', true);
+            }
+        }
+        
         function openTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.sidebar button').forEach(el => el.classList.remove('active'));

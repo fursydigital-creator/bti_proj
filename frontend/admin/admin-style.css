@@ -31,7 +31,7 @@ h3 { margin-top: 0; margin-bottom: 20px; color: #1e293b; }
 /* 4. КАРТКИ ТА ФОРМИ */
 .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 30px; border: 1px solid #e2e8f0; }
 label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #475569; }
-input[type="text"], input[type="url"], input[type="date"], input[type="file"], textarea, select { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; background: #f8fafc; outline: none; transition: 0.2s; }
+input[type="text"], input[type="password"], input[type="url"], input[type="date"], input[type="file"], textarea, select { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; background: #f8fafc; outline: none; transition: 0.2s; }
 input:focus, textarea:focus { border-color: #0ea5e9; background: #fff; }
 
 .action-btn { background: #0ea5e9; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; transition: 0.2s; }
