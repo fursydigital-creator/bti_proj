@@ -103,11 +103,14 @@ class RequestItem(Base):
     phone = Column(String)
     message = Column(String, nullable=True)
     date_str = Column(String)
+    status = Column(String, default="Нова")
 
 class RequestCreate(BaseModel):
     name: str
     phone: str
     message: str = ""
+    class RequestStatusUpdate(BaseModel):
+        status: str
 
 Base.metadata.create_all(bind=engine)
 # Створюємо папку для картинок, якщо її немає
@@ -310,7 +313,7 @@ def delete_document(doc_id: int, db: Session = Depends(get_db), token: dict = De
 @app.post("/api/requests")
 def create_request(req: RequestCreate, db: Session = Depends(get_db)):
     now = datetime.now().strftime("%d.%m.%Y %H:%M")
-    new_req = RequestItem(name=req.name, phone=req.phone, message=req.message, date_str=now)
+    new_req = RequestItem(name=req.name, phone=req.phone, message=req.message, date_str=now, status="Нова")
     db.add(new_req)
     db.commit()
 

@@ -1,91 +1,80 @@
+/* 1. БАЗОВІ СТИЛІ */
 * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
-body { margin: 0; background-color: #f8fafc; color: #334155; }
+body { margin: 0; background-color: #f1f5f9; color: #334155; }
 
-/* Логін скрін */
-#login-screen { display: flex; height: 100vh; align-items: center; justify-content: center; background: #e2e8f0; padding: 15px; }
-.login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-.login-box input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 4px; }
-.login-box button { width: 100%; padding: 10px; background: #0ea5e9; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+/* 2. ЛОГІН ЕКРАН */
+#login-screen { display: flex; height: 100vh; align-items: center; justify-content: center; background: #e2e8f0; padding: 20px; }
+.login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); width: 100%; max-width: 420px; text-align: center; }
+.login-box h2 { margin-top: 0; margin-bottom: 25px; color: #0f172a; }
+.login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; outline: none; transition: 0.2s; }
+.login-box input:focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.1); }
+.login-box button { width: 100%; padding: 12px; background: #0ea5e9; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 16px; transition: 0.2s; }
+.login-box button:hover { background: #0284c7; }
 
-/* Основний лейаут */
-#admin-screen { display: none; }
-.sidebar { width: 250px; background: #1e293b; color: white; height: 100vh; position: fixed; padding: 20px; overflow-y: auto; z-index: 100; }
-.sidebar h2 { margin-top: 0; font-size: 20px; color: #e2e8f0; margin-bottom: 30px; }
-.sidebar button { display: block; width: 100%; padding: 12px; margin-bottom: 10px; background: transparent; color: #cbd5e1; border: none; text-align: left; cursor: pointer; border-radius: 6px; transition: 0.2s; }
-.sidebar button:hover, .sidebar button.active { background: #334155; color: white; }
-.logout-btn { margin-top: 50px; background: #ef4444 !important; color: white !important; }
+/* 3. ОСНОВНА СІТКА АДМІНКИ */
+#admin-screen { display: none; min-height: 100vh; }
+.sidebar { width: 260px; background: #1e293b; color: white; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; overflow-y: auto; z-index: 100; }
+.sidebar h2 { margin-top: 0; font-size: 22px; margin-bottom: 30px; text-align: center; color: #fff; border-bottom: 1px solid #334155; padding-bottom: 15px;}
+.sidebar button { display: block; width: 100%; padding: 12px 15px; margin-bottom: 8px; background: transparent; color: #cbd5e1; border: none; text-align: left; cursor: pointer; border-radius: 6px; font-size: 15px; font-weight: 500; transition: 0.2s; }
+.sidebar button:hover, .sidebar button.active { background: #334155; color: white; padding-left: 20px; }
+.logout-btn { margin-top: auto; background: rgba(239, 68, 68, 0.1) !important; color: #ef4444 !important; text-align: center !important; }
+.logout-btn:hover { background: #ef4444 !important; color: white !important; }
 
-.main-content { margin-left: 250px; padding: 40px; max-width: 1000px; }
-.tab-content { display: none; }
+.main-content { flex: 1; padding: 40px; margin-left: 260px; width: calc(100% - 260px); max-width: 1200px; }
+.tab-content { display: none; animation: fadeIn 0.3s ease; }
 .tab-content.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Картки, форми, списки */
-.card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 25px; }
-input[type="text"], input[type="url"], input[type="date"], input[type="file"], textarea, select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
-.action-btn { background: #0ea5e9; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; }
+h1 { font-size: 28px; margin-top: 0; margin-bottom: 25px; color: #0f172a; }
+h3 { margin-top: 0; margin-bottom: 20px; color: #1e293b; }
+
+/* 4. КАРТКИ ТА ФОРМИ */
+.card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 30px; border: 1px solid #e2e8f0; }
+label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #475569; }
+input[type="text"], input[type="url"], input[type="date"], input[type="file"], textarea, select { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; background: #f8fafc; outline: none; transition: 0.2s; }
+input:focus, textarea:focus { border-color: #0ea5e9; background: #fff; }
+
+.action-btn { background: #0ea5e9; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; transition: 0.2s; }
 .action-btn:hover { background: #0284c7; }
-.del-btn { background: #ef4444; padding: 6px 12px; font-size: 13px; float: right; width: auto; margin-top: 0; }
-.list-item { padding: 15px; border: 1px solid #e2e8f0; margin-bottom: 10px; border-radius: 6px; }
+.del-btn { background: #ef4444; padding: 8px 14px; font-size: 13px; float: right; margin-top: -2px; }
+.del-btn:hover { background: #dc2626; }
 
-#status-msg { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 15px 25px; border-radius: 8px; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; }
+/* 5. СПИСКИ І ПАГІНАЦІЯ */
+.list-item { padding: 20px; border: 1px solid #e2e8f0; margin-bottom: 12px; border-radius: 8px; background: #fff; transition: 0.2s; }
+.list-item:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
 
-/* Пагінація */
-.pagination { display: flex; gap: 8px; margin-top: 20px; justify-content: center; flex-wrap: wrap; }
-.page-btn { padding: 6px 12px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; border-radius: 4px; font-weight: 600; color: #334155; }
+.pagination { display: flex; gap: 8px; margin-top: 25px; justify-content: center; flex-wrap: wrap; }
+.page-btn { padding: 8px 14px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; border-radius: 6px; font-weight: 600; color: #475569; transition: 0.2s; }
 .page-btn.active { background: #0ea5e9; color: #fff; border-color: #0ea5e9; }
-.page-btn:hover:not(.active) { background: #f1f5f9; }
+.page-btn:hover:not(.active) { background: #f1f5f9; color: #0ea5e9; }
+
+/* 6. ПЛАГІНИ (ТАБЛИЦІ ТА РЕДАКТОР) */
+#hot-container { margin-bottom: 25px; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; z-index: 0; position: relative; }
+#editor-container { height: 350px; margin-bottom: 25px; border-radius: 0 0 6px 6px; background: #fff; }
+.ql-toolbar { border-radius: 6px 6px 0 0; background: #f8fafc; }
+
+#status-msg { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 15px 25px; border-radius: 8px; display: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 1000; font-weight: 500; }
 
 /* ========================================================= */
 /* --- АДАПТАЦІЯ ПІД МОБІЛЬНІ ПРИСТРОЇ (МЕНШЕ 768px) --- */
 /* ========================================================= */
 @media (max-width: 768px) {
-    /* Перетворюємо бокове меню на горизонтальне скрол-меню зверху */
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        padding: 10px;
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    .sidebar h2 { display: none; } /* Ховаємо лого на телефоні */
-    .sidebar button {
-        display: inline-block;
-        width: auto;
-        margin-bottom: 0;
-        margin-right: 8px;
-        padding: 10px 15px;
-        white-space: nowrap; /* Щоб текст кнопок не переносився */
-    }
-    .logout-btn { margin-top: 0; margin-left: auto; }
-
-    /* Основний контент займає всю ширину */
-    .main-content {
-        margin-left: 0;
-        padding: 15px;
-    }
-    .card { padding: 15px; }
-
-    /* Перебудовуємо кнопки у списках (щоб не наїжджали на текст) */
+    .sidebar { width: 100%; height: auto; position: sticky; top: 0; padding: 10px; flex-direction: row; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 100; }
+    .sidebar h2 { display: none; }
+    .sidebar button { display: inline-block; width: auto; margin-bottom: 0; margin-right: 8px; padding: 10px 15px; flex-shrink: 0; border-radius: 20px; }
+    .sidebar button:hover, .sidebar button.active { padding-left: 15px; }
+    .logout-btn { margin-top: 0; margin-left: auto; border-radius: 20px !important; }
+    
+    .main-content { margin-left: 0; padding: 15px; width: 100%; }
+    h1 { font-size: 24px; }
+    .card { padding: 20px 15px; }
+    
+    /* Фіксимо кнопки в списках для телефонів */
     .list-item { display: flex; flex-direction: column; }
-    .list-item .del-btn, 
-    .list-item .action-btn {
-        float: none;
-        align-self: flex-start;
-        margin-top: 10px;
-        margin-bottom: 5px;
-    }
-
-    /* Якщо є 2 кнопки поруч (як у новинах), ставимо їх одну під одною */
-    div[style*="display: flex; gap: 10px;"] {
-        flex-direction: column;
-    }
-    div[style*="display: flex; gap: 10px;"] button {
-        width: 100% !important;
-    }
-
-    /* Таблиці Handsontable робимо адаптивними */
-    #hot-container { width: 100% !important; overflow-x: auto; }
+    .list-item .del-btn, .list-item .action-btn { float: none; align-self: stretch; margin-top: 15px; margin-bottom: 5px; width: 100%; text-align: center; }
+    
+    div[style*="display: flex; gap: 10px;"] { flex-direction: column; }
+    div[style*="display: flex; gap: 10px;"] button { width: 100% !important; }
+    
+    #hot-container { overflow-x: auto; }
 }
