@@ -2,53 +2,13 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Адмін-панель БТІ</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
+    <link rel="stylesheet" href="admin-style.css">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; display: flex; background: #f4f7f6; color: #333; height: 100vh;}
-        
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e293b; display: flex; justify-content: center; align-items: center; z-index: 9999; }
-        .login-card { background: white; padding: 40px; border-radius: 10px; width: 100%; max-width: 350px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .login-card h2 { text-align: center; margin-bottom: 25px; color: #0f172a; }
-        
-        #app-screen { display: none; width: 100%; height: 100%; }
-        .sidebar { width: 260px; background: #1e293b; color: white; padding: 20px; display: flex; flex-direction: column; flex-shrink: 0;}
-        .sidebar h2 { font-size: 20px; margin-bottom: 30px; color: #38bdf8; text-align: center; }
-        .sidebar button { background: transparent; color: #cbd5e1; border: none; text-align: left; padding: 12px 15px; margin-bottom: 8px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; transition: 0.2s; }
-        .sidebar button:hover, .sidebar button.active { background: #334155; color: white; }
-        .sidebar .site-link { margin-top: auto; background: #0f172a; text-align: center; text-decoration: none; color: white; padding: 12px; border-radius: 6px;}
-        
-        .content { flex-grow: 1; padding: 40px; overflow-y: auto; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;}
-        .card h3 { margin-bottom: 15px; font-size: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
-        
-        input[type="text"], input[type="password"], input[type="date"], input[type="url"], select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; margin-bottom: 15px; }        
-        textarea { height: 100px; resize: vertical; }
-        button.action-btn { background: #0ea5e9; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 10px; width: 100%;}
-        button.action-btn:hover { background: #0284c7; }
-        button.del-btn { background: #ef4444; padding: 6px 12px; font-size: 13px; float: right; margin-top: 0; width: auto;}
-        button.add-row-btn { background: #10b981; padding: 8px 15px; width: auto; }
-        
-        .price-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
-        .price-row input { margin-bottom: 0; }
-        .price-row .col-name { flex: 2; }
-        .price-row .col-price { flex: 1; }
-        .price-row.header-row input { font-weight: bold; background: #f8fafc; }
-        
-        .list-item { border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; margin-bottom: 10px; background: #f8fafc;}
-        #status-msg { margin-top: 15px; padding: 10px; border-radius: 6px; display: none; font-weight: 500; background: #dcfce7; color: #166534; }
-        
-        /* Стилі для редактора Quill */
-        .ql-container { font-family: 'Inter', sans-serif; font-size: 15px; background: white; border-radius: 0 0 6px 6px; }
-        .ql-toolbar { border-radius: 6px 6px 0 0; background: #f8fafc; }
-    </style>
 </head>
 <body>
 
@@ -148,6 +108,7 @@
                 <h1>Заявки з сайту</h1>
                 <div class="card">
                     <div id="requests-list">Завантаження...</div>
+                    <div id="requests-pagination" class="pagination"></div>
                 </div>
             </div>
 
@@ -188,6 +149,7 @@
                 <div class="card">
                     <h3>Опубліковані новини</h3>
                     <div id="news-list">Завантаження...</div>
+                    <div id="news-pagination" class="pagination"></div>
                 </div>
             </div>
 
@@ -256,6 +218,25 @@
 
         </div> </div> <script>
         const API_URL = 'http://127.0.0.1:8000/api';
+
+        const ITEMS_PER_PAGE = 5; // Скільки елементів показувати на одній сторінці (поставте 5 або 10)
+
+        // Універсальна функція для малювання кнопок
+        function renderPagination(totalItems, currentPage, containerId, callbackFunc) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+            
+            if (totalPages <= 1) return; // Не малюємо кнопки, якщо сторінка лише одна
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                btn.textContent = i;
+                btn.onclick = () => callbackFunc(i);
+                container.appendChild(btn);
+            }
+        }
         
         // --- ІНІЦІАЛІЗАЦІЯ QUILL.JS (Візуальний редактор) ---
         var quill = new Quill('#quill-editor', {
@@ -450,24 +431,40 @@
         }
 
         // --- НОВИНИ ---
-        let editingNewsId = null; // Змінна, що пам'ятає, яку новину ми зараз редагуємо
+        // --- НОВИНИ ---
+        let editingNewsId = null; 
+        let allNewsData = []; // Зберігаємо всі новини
+        let currentNewsPage = 1;
 
         async function loadNews() {
             try {
                 const res = await fetch(`${API_URL}/news`);
-                const newsList = await res.json();
-                const list = document.getElementById('news-list');
-                list.innerHTML = '';
-                if (newsList.length === 0) list.innerHTML = '<p>Новин поки немає.</p>';
-                newsList.forEach(n => { 
-                    list.innerHTML += `<div class="list-item">
-                        <button class="action-btn del-btn" onclick="deleteNews(${n.id})">Видалити</button>
-                        <button class="action-btn" style="background:#f59e0b; padding: 6px 12px; font-size: 13px; float: right; width: auto; margin-top: 0; margin-right: 10px;" onclick="editNews(${n.id})">Редагувати</button>
-                        <strong>${n.title}</strong> <span style="color:#64748b; font-size:13px; margin-left: 10px;">🕒 ${n.date_str}</span>
-                        <div style="font-size: 13px; color: #0ea5e9; margin-top: 5px;">#${n.tag}</div>
-                    </div>`; 
-                });
+                allNewsData = await res.json();
+                renderNewsPage(1); // Завжди починаємо з 1-ї сторінки
             } catch(e) { console.error("Помилка", e); }
+        }
+
+        function renderNewsPage(page) {
+            currentNewsPage = page;
+            const list = document.getElementById('news-list');
+            list.innerHTML = '';
+            
+            if (allNewsData.length === 0) { list.innerHTML = '<p>Новин поки немає.</p>'; return; }
+            
+            // Вираховуємо, які саме новини показати
+            const start = (page - 1) * ITEMS_PER_PAGE;
+            const pageItems = allNewsData.slice(start, start + ITEMS_PER_PAGE);
+
+            pageItems.forEach(n => { 
+                list.innerHTML += `<div class="list-item">
+                    <button class="action-btn del-btn" onclick="deleteNews(${n.id})">Видалити</button>
+                    <button class="action-btn" style="background:#f59e0b; padding: 6px 12px; font-size: 13px; float: right; width: auto; margin-top: 0; margin-right: 10px;" onclick="editNews(${n.id})">Редагувати</button>
+                    <strong>${n.title}</strong> <span style="color:#64748b; font-size:13px; margin-left: 10px;">🕒 ${n.date_str}</span>
+                    <div style="font-size: 13px; color: #0ea5e9; margin-top: 5px;">#${n.tag}</div>
+                </div>`; 
+            });
+
+            renderPagination(allNewsData.length, page, 'news-pagination', renderNewsPage);
         }
 
         // Функція переходу в режим редагування
@@ -681,30 +678,40 @@
         }
 
         // --- ЗАЯВКИ (CRM) ---
+        // --- ЗАЯВКИ (CRM) ---
+        let allRequestsData = [];
+        let currentReqPage = 1;
+
         async function loadRequests() {
             try {
-                // Використовуємо fetchProtected, бо це захищений маршрут
                 const res = await fetchProtected(`${API_URL}/requests`);
-                const requests = await res.json();
-                const list = document.getElementById('requests-list');
-                list.innerHTML = '';
-                
-                if (requests.length === 0) {
-                    list.innerHTML = '<p>Нових заявок поки немає.</p>';
-                    return;
-                }
-                
-                requests.forEach(r => {
-                    const msgDisplay = r.message ? r.message : '<em>Клієнт не залишив повідомлення</em>';
-                    list.innerHTML += `<div class="list-item" style="border-left: 4px solid #0ea5e9;">
-                        <button class="action-btn del-btn" onclick="deleteRequest(${r.id})">Видалити</button>
-                        <strong>${r.name}</strong> 
-                        <span style="color:#64748b; font-size:13px; margin-left: 10px;">🕒 ${r.date_str}</span><br>
-                        <span style="font-size: 14px; color: #64748b;">📞 <a href="tel:${r.phone}" style="color: #0ea5e9; text-decoration: none;">${r.phone}</a></span>
-                        <p style="margin-top: 12px; font-size: 15px; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">${msgDisplay}</p>
-                    </div>`;
-                });
+                allRequestsData = await res.json();
+                renderRequestsPage(1);
             } catch(e) { console.error("Помилка завантаження заявок", e); }
+        }
+
+        function renderRequestsPage(page) {
+            currentReqPage = page;
+            const list = document.getElementById('requests-list');
+            list.innerHTML = '';
+            
+            if (allRequestsData.length === 0) { list.innerHTML = '<p>Нових заявок поки немає.</p>'; return; }
+            
+            const start = (page - 1) * ITEMS_PER_PAGE;
+            const pageItems = allRequestsData.slice(start, start + ITEMS_PER_PAGE);
+
+            pageItems.forEach(r => {
+                const msgDisplay = r.message ? r.message : '<em>Клієнт не залишив повідомлення</em>';
+                list.innerHTML += `<div class="list-item" style="border-left: 4px solid #0ea5e9;">
+                    <button class="action-btn del-btn" onclick="deleteRequest(${r.id})">Видалити</button>
+                    <strong>${r.name}</strong> 
+                    <span style="color:#64748b; font-size:13px; margin-left: 10px;">🕒 ${r.date_str}</span><br>
+                    <span style="font-size: 14px; color: #64748b;">📞 <a href="tel:${r.phone}" style="color: #0ea5e9; text-decoration: none;">${r.phone}</a></span>
+                    <p style="margin-top: 12px; font-size: 15px; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">${msgDisplay}</p>
+                </div>`;
+            });
+
+            renderPagination(allRequestsData.length, page, 'requests-pagination', renderRequestsPage);
         }
 
         async function deleteRequest(id) {

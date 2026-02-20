@@ -32,16 +32,21 @@ TELEGRAM_BOT_TOKEN = "8524963043:AAEz2VDpcBtlR5V1FdkOiqMJhd8JWBOCiwU"
 TELEGRAM_CHAT_ID = "556963147"
 
 def send_telegram_message(text: str):
-    if not TELEGRAM_BOT_TOKEN or TELEGRAM_BOT_TOKEN:
-        return # Якщо токен не вказано, просто ігноруємо
+    # 1. Виправили умову (залишили тільки перевірку на пустий токен)
+    if not TELEGRAM_BOT_TOKEN:
+        return 
+        
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     data = urllib.parse.urlencode({'chat_id': TELEGRAM_CHAT_ID, 'text': text}).encode('utf-8')
-    # Створюємо контекст, який каже Python ігнорувати перевірку SSL-сертифіката
+    
+    # 2. Створюємо контекст для ігнорування SSL
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
+    
     try:
-        urllib.request.urlopen(url, data=data)
+        # 3. ДОДАЛИ context=ctx ОСЬ СЮДИ:
+        urllib.request.urlopen(url, data=data, context=ctx)
     except Exception as e:
         print("Помилка відправки в Telegram:", e)
 

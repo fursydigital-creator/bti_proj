@@ -1,0 +1,91 @@
+* { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { margin: 0; background-color: #f8fafc; color: #334155; }
+
+/* Логін скрін */
+#login-screen { display: flex; height: 100vh; align-items: center; justify-content: center; background: #e2e8f0; padding: 15px; }
+.login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+.login-box input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 4px; }
+.login-box button { width: 100%; padding: 10px; background: #0ea5e9; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
+/* Основний лейаут */
+#admin-screen { display: none; }
+.sidebar { width: 250px; background: #1e293b; color: white; height: 100vh; position: fixed; padding: 20px; overflow-y: auto; z-index: 100; }
+.sidebar h2 { margin-top: 0; font-size: 20px; color: #e2e8f0; margin-bottom: 30px; }
+.sidebar button { display: block; width: 100%; padding: 12px; margin-bottom: 10px; background: transparent; color: #cbd5e1; border: none; text-align: left; cursor: pointer; border-radius: 6px; transition: 0.2s; }
+.sidebar button:hover, .sidebar button.active { background: #334155; color: white; }
+.logout-btn { margin-top: 50px; background: #ef4444 !important; color: white !important; }
+
+.main-content { margin-left: 250px; padding: 40px; max-width: 1000px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Картки, форми, списки */
+.card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 25px; }
+input[type="text"], input[type="url"], input[type="date"], input[type="file"], textarea, select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
+.action-btn { background: #0ea5e9; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; }
+.action-btn:hover { background: #0284c7; }
+.del-btn { background: #ef4444; padding: 6px 12px; font-size: 13px; float: right; width: auto; margin-top: 0; }
+.list-item { padding: 15px; border: 1px solid #e2e8f0; margin-bottom: 10px; border-radius: 6px; }
+
+#status-msg { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 15px 25px; border-radius: 8px; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; }
+
+/* Пагінація */
+.pagination { display: flex; gap: 8px; margin-top: 20px; justify-content: center; flex-wrap: wrap; }
+.page-btn { padding: 6px 12px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; border-radius: 4px; font-weight: 600; color: #334155; }
+.page-btn.active { background: #0ea5e9; color: #fff; border-color: #0ea5e9; }
+.page-btn:hover:not(.active) { background: #f1f5f9; }
+
+/* ========================================================= */
+/* --- АДАПТАЦІЯ ПІД МОБІЛЬНІ ПРИСТРОЇ (МЕНШЕ 768px) --- */
+/* ========================================================= */
+@media (max-width: 768px) {
+    /* Перетворюємо бокове меню на горизонтальне скрол-меню зверху */
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 10px;
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .sidebar h2 { display: none; } /* Ховаємо лого на телефоні */
+    .sidebar button {
+        display: inline-block;
+        width: auto;
+        margin-bottom: 0;
+        margin-right: 8px;
+        padding: 10px 15px;
+        white-space: nowrap; /* Щоб текст кнопок не переносився */
+    }
+    .logout-btn { margin-top: 0; margin-left: auto; }
+
+    /* Основний контент займає всю ширину */
+    .main-content {
+        margin-left: 0;
+        padding: 15px;
+    }
+    .card { padding: 15px; }
+
+    /* Перебудовуємо кнопки у списках (щоб не наїжджали на текст) */
+    .list-item { display: flex; flex-direction: column; }
+    .list-item .del-btn, 
+    .list-item .action-btn {
+        float: none;
+        align-self: flex-start;
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
+
+    /* Якщо є 2 кнопки поруч (як у новинах), ставимо їх одну під одною */
+    div[style*="display: flex; gap: 10px;"] {
+        flex-direction: column;
+    }
+    div[style*="display: flex; gap: 10px;"] button {
+        width: 100% !important;
+    }
+
+    /* Таблиці Handsontable робимо адаптивними */
+    #hot-container { width: 100% !important; overflow-x: auto; }
+}
