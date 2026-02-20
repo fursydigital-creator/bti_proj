@@ -275,18 +275,18 @@
 
                 <div>
                     <h3 style="margin-bottom: 20px; color: var(--primary-color);">Форма звернення</h3>
-                    <form id="contact-form" onsubmit="return sendForm()">
+                    <form id="contact-form" onsubmit="return sendForm(event)">
                         <div class="form-group">
                             <label>Ваше ім'я <span style="color:red">*</span></label>
                             <input type="text" name="name" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label>Email <span style="color:red">*</span></label>
-                            <input type="email" name="email" class="form-control" required>
+                            <label>Телефон <span style="color:red">*</span></label>
+                            <input type="tel" name="phone" class="form-control" placeholder="+380..." required>
                         </div>
                         <div class="form-group">
-                            <label>Повідомлення <span style="color:red">*</span></label>
-                            <textarea name="message" class="form-control" rows="6" required></textarea>
+                            <label>Повідомлення (необов'язково)</label>
+                            <textarea name="message" class="form-control" rows="4"></textarea>
                         </div>
                         <p style="font-size: 12px; margin-bottom: 15px; color: #777;">
                             Дані використовуються лише для зв'язку і не передаються третім особам.
@@ -328,9 +328,43 @@
             });
         });
 
-        function sendForm() {
-            alert('Повідомлення надіслано! Ми зв\'яжемося з вами найближчим часом.');
-            document.getElementById('contact-form').reset();
+        async function sendForm(event) {
+            event.preventDefault(); // Зупиняємо стандартне перезавантаження сторінки
+            const form = document.getElementById('contact-form');
+            const formData = new FormData(form);
+            
+            const data = {
+                name: formData.get('name'),
+                phone: formData.get('phone'), // Беремо телефон
+                message: formData.get('message') || "" // Якщо пусте, передаємо пустий рядок
+            };
+
+            // Змінюємо текст кнопки на час відправки
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Відправка...';
+            submitBtn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/requests`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (res.ok) {
+                    alert('Повідомлення надіслано! Ми зв\'яжемося з вами найближчим часом.');
+                    form.reset();
+                } else {
+                    alert('Виникла помилка. Спробуйте пізніше.');
+                }
+            } catch (e) {
+                alert('Помилка з\'єднання з сервером.');
+            } finally {
+                // Повертаємо кнопку в норму
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
             return false;
         }
 
@@ -416,7 +450,7 @@
             fetchHeroSettings();
             fetchFaqs();
             fetchNews();
-            fetchDocuments();
+            fetchDocuments();c
         });
 
         async function fetchDocuments() {

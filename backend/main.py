@@ -10,6 +10,9 @@ import jwt
 import os
 import shutil
 import uuid
+from datetime import datetime
+import urllib.request
+import urllib.parse
 
 # --- НАЛАШТУВАННЯ БЕЗПЕКИ (JWT) ---
 SECRET_KEY = "bti_super_secret_key_2026"
@@ -22,6 +25,20 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Security(security))
         return payload
     except:
         raise HTTPException(status_code=401, detail="Невірний або прострочений токен")
+    
+# --- НАЛАШТУВАННЯ TELEGRAM ---
+TELEGRAM_BOT_TOKEN = "8524963043:AAEz2VDpcBtlR5V1FdkOiqMJhd8JWBOCiwU"
+TELEGRAM_CHAT_ID = "556963147"
+
+def send_telegram_message(text: str):
+    if not TELEGRAM_BOT_TOKEN or TELEGRAM_BOT_TOKEN == "ВСТАВТЕ_СЮДИ_ВАШ_ТОКЕН_ВІД_BOTFATHER":
+        return # Якщо токен не вказано, просто ігноруємо
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    data = urllib.parse.urlencode({'chat_id': TELEGRAM_CHAT_ID, 'text': text}).encode('utf-8')
+    try:
+        urllib.request.urlopen(url, data=data)
+    except Exception as e:
+        print("Помилка відправки в Telegram:", e)
 
 # --- 1. БАЗА ДАНИХ ---
 SQLALCHEMY_DATABASE_URL = "sqlite:///./bti.db"
@@ -68,9 +85,25 @@ class DocumentItem(Base):
     file_type = Column(String)     # Напр. "PDF файл" або "DOCX документ"
     file_url = Column(String)      # Посилання на файл
 
+# МОДЕЛЬ ДЛЯ ЗАЯВОК (ЛІДІВ)
+class RequestItem(Base):
+    __tablename__ = "requests"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    phone = Column(String)
+    message = Column(String, nullable=True)
+    date_str = Column(String)
+
+class RequestCreate(BaseModel):
+    name: str
+    phone: str
+    message: str = ""
+
 Base.metadata.create_all(bind=engine)
 # Створюємо папку для картинок, якщо її немає
 os.makedirs("uploads", exist_ok=True)
+
+
 
 # --- 3. НАЛАШТУВАННЯ FASTAPI ---
 app = FastAPI(title="BTI Admin API")
@@ -240,3 +273,54 @@ def update_news(news_id: int, news: NewsCreate, db: Session = Depends(get_db), t
     
     db.commit()
     return {"message": "Новину успішно оновлено!"}
+# --- ДОКУМЕНТИ ДЛЯ ЗАВАНТАЖЕННЯ ---
+
+@app.get("/api/documents")
+def get_documents(db: Session = Depends(get_db)):
+    return db.query(DocumentItem).all()
+
+@app.post("/api/documents")
+def create_document(doc: DocumentCreate, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
+    new_doc = DocumentItem(**doc.dict())
+    db.add(new_doc)
+    db.commit()
+    return {"message": "Документ успішно додано!"}
+
+@app.delete("/api/documents/{doc_id}")
+def delete_document(doc_id: int, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
+    doc_item = db.query(DocumentItem).filter(DocumentItem.id == doc_id).first()
+    if doc_item:
+        db.delete(doc_item)
+        db.commit()
+    return {"message": "Документ видалено"}
+
+# --- ЗАЯВКИ З САЙТУ (CRM) ---
+
+# Відкритий маршрут: сайт відправляє заявку
+@app.post("/api/requests")
+def create_request(req: RequestCreate, db: Session = Depends(get_db)):
+    now = datetime.now().strftime("%d.%m.%Y %H:%M")
+    new_req = RequestItem(name=req.name, email=req.email, message=req.message, date_str=now)
+    db.add(new_req)
+    db.commit()
+
+#Формуємо текст для Телеграму (з перевіркою, чи є повідомлення)
+    msg_text = req.message if req.message else "Без повідомлення"
+    msg = f"🔔 НОВА ЗАЯВКА З САЙТУ!\n\n👤 Ім'я: {req.name}\n📞 Телефон: {req.phone}\n💬 Текст: {msg_text}"
+    send_telegram_message(msg)
+
+    return {"message": "Заявку надіслано!"}
+
+# Захищений маршрут: адмінка отримує список заявок
+@app.get("/api/requests")
+def get_requests(db: Session = Depends(get_db), token: dict = Depends(verify_token)):
+    return db.query(RequestItem).order_by(RequestItem.id.desc()).all()
+
+# Захищений маршрут: видалення заявки
+@app.delete("/api/requests/{req_id}")
+def delete_request(req_id: int, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
+    req_item = db.query(RequestItem).filter(RequestItem.id == req_id).first()
+    if req_item:
+        db.delete(req_item)
+        db.commit()
+    return {"message": "Заявку видалено"}

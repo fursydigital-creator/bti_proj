@@ -67,6 +67,7 @@
     <div id="app-screen">
         <div class="sidebar">
             <h2>БТІ Адмін</h2>
+            <button onclick="openTab('tab-requests')">📥 Заявки з сайту</button>
             <button onclick="openTab('tab-hero')" class="active">Головна (Текст)</button>
             <button onclick="openTab('tab-faq')">Часті питання (FAQ)</button>
             <button onclick="openTab('tab-services')">Послуги та Ціни</button>
@@ -140,6 +141,13 @@
                     <button type="button" class="action-btn add-row-btn" onclick="addTableRow('', '')">+ Додати рядок</button>
                     <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
                     <button type="button" class="action-btn" style="width: auto;" onclick="saveServiceData()">💾 Зберегти таблицю</button>
+                </div>
+            </div>
+
+            <div id="tab-requests" class="tab-content">
+                <h1>Заявки з сайту</h1>
+                <div class="card">
+                    <div id="requests-list">Завантаження...</div>
                 </div>
             </div>
 
@@ -312,6 +320,7 @@
             if (tabId === 'tab-news') loadNews();
             if (tabId === 'tab-contacts') loadContacts();
             if (tabId === 'tab-documents') loadDocuments();
+            if (tabId === 'tab-requests') loadRequests();
         }
 
         function showStatus(msg, isError = false) {
@@ -523,12 +532,18 @@
             const token = localStorage.getItem('bti_token');
             if (!options.headers) options.headers = {};
             options.headers['Authorization'] = `Bearer ${token}`;
+            
             // Додаємо Content-Type JSON лише якщо це не FormData (не завантаження файлу)
             if (!(options.body instanceof FormData)) {
                 options.headers['Content-Type'] = 'application/json';
             }
+            
             const response = await fetch(url, options);
             if (response.status === 401) { logout(); alert("Сесія завершена."); throw new Error("Unauthorized"); }
+            
+            // НОВИЙ РЯДОК: Якщо бекенд видав помилку (наприклад 500), викликаємо тривогу
+            if (!response.ok) { throw new Error(`Помилка сервера: ${response.status}`); }
+            
             return response;
         }
 
@@ -661,6 +676,43 @@
                     await fetchProtected(`${API_URL}/documents/${id}`, { method: 'DELETE' });
                     showStatus('Видалено!');
                     loadDocuments();
+                } catch(e) {}
+            }
+        }
+
+        // --- ЗАЯВКИ (CRM) ---
+        async function loadRequests() {
+            try {
+                // Використовуємо fetchProtected, бо це захищений маршрут
+                const res = await fetchProtected(`${API_URL}/requests`);
+                const requests = await res.json();
+                const list = document.getElementById('requests-list');
+                list.innerHTML = '';
+                
+                if (requests.length === 0) {
+                    list.innerHTML = '<p>Нових заявок поки немає.</p>';
+                    return;
+                }
+                
+                requests.forEach(r => {
+                    const msgDisplay = r.message ? r.message : '<em>Клієнт не залишив повідомлення</em>';
+                    list.innerHTML += `<div class="list-item" style="border-left: 4px solid #0ea5e9;">
+                        <button class="action-btn del-btn" onclick="deleteRequest(${r.id})">Видалити</button>
+                        <strong>${r.name}</strong> 
+                        <span style="color:#64748b; font-size:13px; margin-left: 10px;">🕒 ${r.date_str}</span><br>
+                        <span style="font-size: 14px; color: #64748b;">📞 <a href="tel:${r.phone}" style="color: #0ea5e9; text-decoration: none;">${r.phone}</a></span>
+                        <p style="margin-top: 12px; font-size: 15px; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">${msgDisplay}</p>
+                    </div>`;
+                });
+            } catch(e) { console.error("Помилка завантаження заявок", e); }
+        }
+
+        async function deleteRequest(id) {
+            if(confirm("Видалити цю заявку назавжди?")) {
+                try {
+                    await fetchProtected(`${API_URL}/requests/${id}`, { method: 'DELETE' });
+                    showStatus('Заявку видалено!');
+                    loadRequests();
                 } catch(e) {}
             }
         }
