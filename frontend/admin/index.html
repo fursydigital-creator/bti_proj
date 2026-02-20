@@ -71,6 +71,7 @@
             <button onclick="openTab('tab-faq')">Часті питання (FAQ)</button>
             <button onclick="openTab('tab-services')">Послуги та Ціни</button>
             <button onclick="openTab('tab-news')">Новини (Блог)</button>
+            <button onclick="openTab('tab-documents')">Документи (Бланки)</button>
             <button onclick="openTab('tab-contacts')">Контакти</button>
             <button onclick="logout()" style="margin-top: 20px; color: #ef4444;">🚪 Вийти</button>
             <a href="../index.html" target="_blank" class="site-link">Перейти на сайт ↗</a>
@@ -157,18 +158,46 @@
                                 <option value="Подія">Подія</option>
                             </select>
                         </div>
-                        <input type="url" id="news-image" placeholder="Посилання на картинку (URL)" required>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display:block; margin-bottom: 5px; font-weight: 600;">Головне фото статті:</label>
+                            <input type="file" id="news-image-file" accept="image/*" style="margin-bottom: 5px;">
+                            <input type="hidden" id="news-image-url">
+                            <div id="image-preview" style="display: none; margin-top: 10px;">
+                                <img src="" style="max-height: 100px; border-radius: 6px;">
+                            </div>
+                        </div>
                         <textarea id="news-preview" placeholder="Короткий опис для картки на головній сторінці (2-3 речення)" required></textarea>
                         
                         <label style="display:block; margin-bottom: 8px; font-weight: 600; color: #334155;">Повний текст статті:</label>
                         <div id="quill-editor" style="height: 300px; margin-bottom: 20px;"></div>
                         
-                        <button type="submit" class="action-btn" style="width: auto;">Опублікувати новину</button>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="submit" id="news-submit-btn" class="action-btn" style="width: auto;">Опублікувати новину</button>
+                            <button type="button" id="news-cancel-btn" class="action-btn" style="width: auto; background: #64748b; display: none;" onclick="cancelNewsEdit()">Скасувати редагування</button>
+                        </div>
                     </form>
                 </div>
                 <div class="card">
                     <h3>Опубліковані новини</h3>
                     <div id="news-list">Завантаження...</div>
+                </div>
+            </div>
+
+            <div id="tab-documents" class="tab-content">
+                <h1>Документи для завантаження</h1>
+                <div class="card">
+                    <h3>Додати новий документ</h3>
+                    <form id="doc-form">
+                        <input type="text" id="doc-title" placeholder="Назва документу (напр. Заява на інвентаризацію)" required>
+                        <label style="display:block; margin-bottom: 5px; font-weight: 600;">Оберіть файл (PDF, DOC, DOCX):</label>
+                        <input type="file" id="doc-file" accept=".pdf,.doc,.docx" required style="margin-bottom: 15px;">
+                        
+                        <button type="submit" class="action-btn" style="width: auto;">Завантажити та зберегти</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>Список документів</h3>
+                    <div id="doc-list">Завантаження...</div>
                 </div>
             </div>
 
@@ -282,6 +311,7 @@
             if (tabId === 'tab-faq') loadFaqs();
             if (tabId === 'tab-news') loadNews();
             if (tabId === 'tab-contacts') loadContacts();
+            if (tabId === 'tab-documents') loadDocuments();
         }
 
         function showStatus(msg, isError = false) {
@@ -411,6 +441,8 @@
         }
 
         // --- НОВИНИ ---
+        let editingNewsId = null; // Змінна, що пам'ятає, яку новину ми зараз редагуємо
+
         async function loadNews() {
             try {
                 const res = await fetch(`${API_URL}/news`);
@@ -421,56 +453,214 @@
                 newsList.forEach(n => { 
                     list.innerHTML += `<div class="list-item">
                         <button class="action-btn del-btn" onclick="deleteNews(${n.id})">Видалити</button>
+                        <button class="action-btn" style="background:#f59e0b; padding: 6px 12px; font-size: 13px; float: right; width: auto; margin-top: 0; margin-right: 10px;" onclick="editNews(${n.id})">Редагувати</button>
                         <strong>${n.title}</strong> <span style="color:#64748b; font-size:13px; margin-left: 10px;">🕒 ${n.date_str}</span>
                         <div style="font-size: 13px; color: #0ea5e9; margin-top: 5px;">#${n.tag}</div>
                     </div>`; 
                 });
-            } catch(e) { console.error("Помилка завантаження новин", e); }
+            } catch(e) { console.error("Помилка", e); }
         }
 
+        // Функція переходу в режим редагування
+        async function editNews(id) {
+            try {
+                const res = await fetch(`${API_URL}/news/${id}`);
+                const n = await res.json();
+                
+                editingNewsId = id;
+                document.getElementById('news-title').value = n.title;
+                
+                // Перетворюємо DD.MM.YYYY назад у YYYY-MM-DD для поля date
+                const [d, m, y] = n.date_str.split('.');
+                document.getElementById('news-date').value = `${y}-${m}-${d}`;
+                
+                document.getElementById('news-tag').value = n.tag;
+                document.getElementById('news-preview').value = n.preview;
+                quill.root.innerHTML = n.content;
+                
+                // Показуємо існуючу картинку
+                document.getElementById('news-image-url').value = n.image_url;
+                const previewDiv = document.getElementById('image-preview');
+                previewDiv.style.display = 'block';
+                previewDiv.querySelector('img').src = n.image_url;
+                
+                // Міняємо кнопки
+                document.getElementById('news-submit-btn').textContent = '💾 Оновити новину';
+                document.getElementById('news-cancel-btn').style.display = 'block';
+                
+                // Скролимо до форми
+                document.getElementById('news-form').scrollIntoView({behavior: 'smooth'});
+            } catch(e) { console.error("Помилка завантаження новини для редагування", e); }
+        }
+
+        // Функція скасування редагування
+        function cancelNewsEdit() {
+            editingNewsId = null;
+            document.getElementById('news-form').reset();
+            quill.root.innerHTML = '';
+            document.getElementById('news-image-url').value = '';
+            document.getElementById('image-preview').style.display = 'none';
+            document.getElementById('news-submit-btn').textContent = 'Опублікувати новину';
+            document.getElementById('news-cancel-btn').style.display = 'none';
+        }
+
+        // Завантаження файлу на сервер
+        async function uploadImageFile(file) {
+            const formData = new FormData();
+            formData.append("file", file);
+            
+            const res = await fetchProtected(`${API_URL}/upload`, {
+                method: 'POST',
+                headers: {}, // Видаляємо Content-Type, браузер сам поставить multipart/form-data
+                body: formData
+            });
+            const data = await res.json();
+            return data.url;
+        }
+
+        // Перевизначаємо fetchProtected, щоб він не збивав Content-Type для файлів
+        async function fetchProtected(url, options = {}) {
+            const token = localStorage.getItem('bti_token');
+            if (!options.headers) options.headers = {};
+            options.headers['Authorization'] = `Bearer ${token}`;
+            // Додаємо Content-Type JSON лише якщо це не FormData (не завантаження файлу)
+            if (!(options.body instanceof FormData)) {
+                options.headers['Content-Type'] = 'application/json';
+            }
+            const response = await fetch(url, options);
+            if (response.status === 401) { logout(); alert("Сесія завершена."); throw new Error("Unauthorized"); }
+            return response;
+        }
+
+        // Збереження (або оновлення) новини
         document.getElementById('news-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const articleContent = quill.root.innerHTML;
-            if (quill.getText().trim().length === 0) {
-                alert("Текст статті не може бути порожнім!");
-                return;
-            }
+            if (quill.getText().trim().length === 0) { alert("Текст не може бути порожнім!"); return; }
 
             const dateInput = document.getElementById('news-date').value;
             const [y, m, d] = dateInput.split('-');
             const formattedDate = `${d}.${m}.${y}`;
 
+            // Логіка картинки
+            let finalImageUrl = document.getElementById('news-image-url').value;
+            const fileInput = document.getElementById('news-image-file');
+            
+            // Якщо вибрано новий файл — завантажуємо його
+            if (fileInput.files.length > 0) {
+                showStatus('Завантаження картинки...', false);
+                try {
+                    finalImageUrl = await uploadImageFile(fileInput.files[0]);
+                } catch(err) {
+                    showStatus('Помилка завантаження картинки', true);
+                    return;
+                }
+            } else if (!finalImageUrl) {
+                alert("Будь ласка, виберіть картинку!");
+                return;
+            }
+
             const newsData = {
                 title: document.getElementById('news-title').value,
                 date_str: formattedDate,
                 tag: document.getElementById('news-tag').value,
-                image_url: document.getElementById('news-image').value,
+                image_url: finalImageUrl,
                 preview: document.getElementById('news-preview').value,
                 content: articleContent
             };
 
             try {
-                await fetchProtected(`${API_URL}/news`, {
-                    method: 'POST',
-                    body: JSON.stringify(newsData)
-                });
+                if (editingNewsId) {
+                    // ОНОВЛЕННЯ ІСНУЮЧОЇ
+                    await fetchProtected(`${API_URL}/news/${editingNewsId}`, { method: 'PUT', body: JSON.stringify(newsData) });
+                    showStatus('Новину успішно оновлено!');
+                } else {
+                    // СТВОРЕННЯ НОВОЇ
+                    await fetchProtected(`${API_URL}/news`, { method: 'POST', body: JSON.stringify(newsData) });
+                    showStatus('Новину успішно опубліковано!');
+                }
                 
-                showStatus('Новину успішно опубліковано!');
-                document.getElementById('news-form').reset();
-                quill.root.innerHTML = ''; 
-                loadNews(); 
-            } catch(err) {
-                showStatus('Помилка публікації', true);
-            }
+                cancelNewsEdit(); // Очищаємо форму
+                loadNews(); // Оновлюємо список
+            } catch(err) { showStatus('Помилка збереження', true); }
         });
 
         async function deleteNews(id) {
-            if(confirm("Ви дійсно хочете видалити цю новину/статтю?")) {
+            if(confirm("Ви дійсно хочете видалити цю новину?")) {
                 try {
                     await fetchProtected(`${API_URL}/news/${id}`, { method: 'DELETE' });
-                    showStatus('Новину видалено!');
+                    if (editingNewsId === id) cancelNewsEdit(); // Якщо видалили ту, що зараз редагуємо
+                    showStatus('Видалено!');
                     loadNews();
+                } catch(e) {}
+            }
+        }
+
+        // --- ДОКУМЕНТИ ---
+        async function loadDocuments() {
+            try {
+                const res = await fetch(`${API_URL}/documents`);
+                const docs = await res.json();
+                const list = document.getElementById('doc-list');
+                list.innerHTML = '';
+                if (docs.length === 0) list.innerHTML = '<p>Документів поки немає.</p>';
+                
+                docs.forEach(d => {
+                    list.innerHTML += `<div class="list-item">
+                        <button class="action-btn del-btn" onclick="deleteDocument(${d.id})">Видалити</button>
+                        <strong>${d.title}</strong> 
+                        <span style="color:#64748b; font-size:13px; margin-left: 10px;">[${d.file_type}]</span>
+                        <div style="font-size: 13px; margin-top: 5px;">
+                            <a href="${d.file_url}" target="_blank" style="color: #0ea5e9; text-decoration: none;">Переглянути файл ↗</a>
+                        </div>
+                    </div>`;
+                });
+            } catch(e) { console.error("Помилка", e); }
+        }
+
+        document.getElementById('doc-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('doc-file');
+            const titleInput = document.getElementById('doc-title').value;
+
+            if (fileInput.files.length === 0) { alert("Оберіть файл!"); return; }
+            
+            const file = fileInput.files[0];
+            const ext = file.name.split('.').pop().toUpperCase(); // Отримуємо розширення (PDF, DOCX)
+            const fileType = `${ext} файл`;
+
+            showStatus('Завантаження файлу на сервер...', false);
+
+            try {
+                // Використовуємо нашу функцію завантаження (ту саму, що й для картинок)
+                const fileUrl = await uploadImageFile(file); 
+
+                const docData = {
+                    title: titleInput,
+                    file_type: fileType,
+                    file_url: fileUrl
+                };
+
+                await fetchProtected(`${API_URL}/documents`, {
+                    method: 'POST',
+                    body: JSON.stringify(docData)
+                });
+                
+                showStatus('Документ успішно додано!');
+                document.getElementById('doc-form').reset();
+                loadDocuments();
+            } catch(err) {
+                showStatus('Помилка збереження документу', true);
+            }
+        });
+
+        async function deleteDocument(id) {
+            if(confirm("Ви дійсно хочете видалити цей документ?")) {
+                try {
+                    await fetchProtected(`${API_URL}/documents/${id}`, { method: 'DELETE' });
+                    showStatus('Видалено!');
+                    loadDocuments();
                 } catch(e) {}
             }
         }

@@ -1,11 +1,15 @@
-from fastapi import FastAPI, Depends, HTTPException, Security
+from fastapi import FastAPI, Depends, HTTPException, Security, UploadFile, File
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import create_engine, Column, Integer, String, JSON
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from pydantic import BaseModel
 from typing import List
 import jwt
+import os
+import shutil
+import uuid
 
 # --- НАЛАШТУВАННЯ БЕЗПЕКИ (JWT) ---
 SECRET_KEY = "bti_super_secret_key_2026"
@@ -56,11 +60,23 @@ class NewsItem(Base):
     preview = Column(String)       # Короткий текст для картки на головній
     content = Column(String)       # Повний HTML текст статті з редактора
 
+# МОДЕЛЬ ДЛЯ ДОКУМЕНТІВ
+class DocumentItem(Base):
+    __tablename__ = "documents"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String)         # Напр. "Заява на інвентаризацію"
+    file_type = Column(String)     # Напр. "PDF файл" або "DOCX документ"
+    file_url = Column(String)      # Посилання на файл
+
 Base.metadata.create_all(bind=engine)
+# Створюємо папку для картинок, якщо її немає
+os.makedirs("uploads", exist_ok=True)
 
 # --- 3. НАЛАШТУВАННЯ FASTAPI ---
 app = FastAPI(title="BTI Admin API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+# Дозволяємо браузеру читати файли з папки uploads
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 def get_db():
     db = SessionLocal()
@@ -83,6 +99,11 @@ class NewsCreate(BaseModel):
     image_url: str
     preview: str
     content: str
+
+class DocumentCreate(BaseModel):
+    title: str
+    file_type: str
+    file_url: str
 
 # Отримання однієї конкретної новини за ID (відкритий маршрут)
 @app.get("/api/news/{news_id}")
@@ -188,3 +209,34 @@ def bulk_update_settings(data: SettingsUpdate, db: Session = Depends(get_db), to
             db.add(Setting(key=key, value=value))
     db.commit()
     return {"message": "Налаштування оновлено"}
+
+# --- ЗАВАНТАЖЕННЯ КАРТИНОК ---
+@app.post("/api/upload")
+def upload_file(file: UploadFile = File(...), token: dict = Depends(verify_token)):
+    # Генеруємо унікальне ім'я (щоб файли не перезаписували один одного)
+    ext = file.filename.split(".")[-1]
+    unique_filename = f"{uuid.uuid4().hex}.{ext}"
+    file_path = f"uploads/{unique_filename}"
+    
+    # Зберігаємо файл
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    # Повертаємо готове посилання на картинку
+    return {"url": f"http://127.0.0.1:8000/uploads/{unique_filename}"}
+
+# --- ОНОВЛЕННЯ ІСНУЮЧОЇ НОВИНИ ---
+@app.put("/api/news/{news_id}")
+def update_news(news_id: int, news: NewsCreate, db: Session = Depends(get_db), token: dict = Depends(verify_token)):
+    item = db.query(NewsItem).filter(NewsItem.id == news_id).first()
+    if not item: raise HTTPException(status_code=404, detail="Новину не знайдено")
+    
+    item.title = news.title
+    item.date_str = news.date_str
+    item.tag = news.tag
+    item.image_url = news.image_url
+    item.preview = news.preview
+    item.content = news.content
+    
+    db.commit()
+    return {"message": "Новину успішно оновлено!"}

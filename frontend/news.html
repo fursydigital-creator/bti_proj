@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Всі статті та новини | БТІ Експерт</title>
+    <meta name="description" content="Корисні статті, новини та поради щодо технічної інвентаризації та нерухомості.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <div class="container nav-wrapper">
+            <a href="index.html" class="logo">🏢 БТІ<span>Експерт</span></a>
+            <nav id="nav-menu" class="nav-links">
+                <a href="index.html#about">Про БТІ</a>
+                <a href="index.html#services">Послуги</a>
+                <a href="index.html#downloads">Завантаження</a>
+                <a href="index.html#faq">FAQ</a>
+                <a href="index.html#contacts">Контакти</a>
+            </nav>
+            <div class="mobile-toggle" onclick="toggleMenu()">☰</div>
+        </div>
+    </header>
+
+    <section class="page-header">
+        <div class="container">
+            <h1>Блог та Корисні поради</h1>
+            <div class="breadcrumbs">
+                <a href="index.html">Головна</a> <span class="separator">/</span> 
+                <span>Всі статті</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-padding bg-light">
+        <div class="container">
+            <div class="news-grid" id="all-news-container">
+                <p style="text-align: center; grid-column: 1/-1;">Завантаження статей...</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="copyright">
+                © 2026 Комунальне підприємство «Бюро технічної інвентаризації». Всі права захищені.
+            </div>
+        </div>
+    </footer>
+
+    <script src="contacts.js"></script>
+    <script>
+        const API_URL = 'http://127.0.0.1:8000/api';
+
+        function toggleMenu() {
+            const nav = document.getElementById('nav-menu');
+            nav.classList.toggle('mobile-menu-open');
+        }
+
+        async function fetchAllNews() {
+            try {
+                const res = await fetch(`${API_URL}/news`);
+                const newsData = await res.json();
+                const container = document.getElementById('all-news-container');
+                
+                if (newsData.length === 0) {
+                    container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">Новин поки немає.</p>';
+                    return;
+                }
+
+                let html = '';
+                // На відміну від головної сторінки, тут ми не робимо .slice(0, 3), а виводимо ВСІ
+                newsData.forEach(n => {
+                    const img = n.image_url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop';
+                    html += `
+                    <article class="news-card">
+                        <div class="news-img-wrapper">
+                            <img src="${img}" alt="Фото новини">
+                            <span class="news-tag">${n.tag}</span>
+                        </div>
+                        <div class="news-content">
+                            <div class="news-meta">${n.date_str}</div>
+                            <h3>${n.title}</h3>
+                            <p>${n.preview}</p>
+                            <a href="article.html?id=${n.id}" class="news-link">Читати далі →</a>
+                        </div>
+                    </article>`;
+                });
+                container.innerHTML = html;
+            } catch (e) { 
+                console.error("Помилка завантаження новин:", e);
+                document.getElementById('all-news-container').innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: red;">Помилка зв\'язку з сервером.</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchAllNews);
+    </script>
+</body>
+</html> 

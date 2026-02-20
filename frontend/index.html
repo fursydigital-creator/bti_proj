@@ -213,33 +213,8 @@
                 <p>Оберіть необхідний бланк</p>
             </div>
             
-            <div class="downloads-grid">
-                <a href="#" class="doc-card">
-                    <div class="doc-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-                    </div>
-                    <h3 class="doc-title">Заява на інвентаризацію</h3>
-                    <span class="doc-type">PDF файл</span>
-                    <span class="doc-btn">Завантажити</span>
-                </a>
-
-                <a href="#" class="doc-card">
-                    <div class="doc-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    </div>
-                    <h3 class="doc-title">Опитувальний лист</h3>
-                    <span class="doc-type">PDF файл</span>
-                    <span class="doc-btn">Завантажити</span>
-                </a>
-
-                <a href="#" class="doc-card">
-                    <div class="doc-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M16 13H8"></path><path d="M16 17H8"></path><path d="M10 9H8"></path></svg>
-                    </div>
-                    <h3 class="doc-title">Зразок договору</h3>
-                    <span class="doc-type">PDF файл</span>
-                    <span class="doc-btn">Завантажити</span>
-                </a>
+            <div class="downloads-grid" id="downloads-container">
+                <p style="text-align: center; grid-column: 1/-1;">Завантаження документів...</p>
             </div>
         </div>
     </section>
@@ -441,7 +416,36 @@
             fetchHeroSettings();
             fetchFaqs();
             fetchNews();
+            fetchDocuments();
         });
+
+        async function fetchDocuments() {
+            try {
+                const res = await fetch(`${API_URL}/documents`);
+                const docsData = await res.json();
+                const container = document.getElementById('downloads-container');
+                
+                if (docsData.length === 0) {
+                    container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">Бланки тимчасово недоступні.</p>';
+                    return;
+                }
+
+                let html = '';
+                docsData.forEach(d => {
+                    // Стандартна красива іконка для всіх документів
+                    html += `
+                    <a href="${d.file_url}" target="_blank" class="doc-card">
+                        <div class="doc-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        </div>
+                        <h3 class="doc-title">${d.title}</h3>
+                        <span class="doc-type">${d.file_type}</span>
+                        <span class="doc-btn">Завантажити</span>
+                    </a>`;
+                });
+                container.innerHTML = html;
+            } catch (e) { console.error("Помилка Документів:", e); }
+        }
     </script>
 
     <script src="contacts.js"></script>
