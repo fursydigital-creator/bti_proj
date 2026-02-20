@@ -27,8 +27,9 @@
 
     <div id="admin-screen"> <div class="sidebar">
             <h2>БТІ Адмін</h2>
+            <button onclick="openTab('tab-dashboard')" class="active">📊 Головна панель</button>
             <button onclick="openTab('tab-requests')">📥 Заявки з сайту</button>
-            <button onclick="openTab('tab-hero')" class="active">Головна (Текст)</button>
+            <button onclick="openTab('tab-hero')">Головна (Текст)</button>
             <button onclick="openTab('tab-faq')">Часті питання (FAQ)</button>
             <button onclick="openTab('tab-services')">Послуги та Ціни</button>
             <button onclick="openTab('tab-news')">Новини (Блог)</button>
@@ -39,7 +40,33 @@
 
         <div class="main-content"> <div id="status-msg"></div>
 
-            <div id="tab-hero" class="tab-content active">
+        <div id="tab-dashboard" class="tab-content active">
+                <h1>Огляд системи</h1>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <div class="card" style="margin-bottom: 0; text-align: center; border-bottom: 4px solid #0ea5e9;">
+                        <h2 id="stat-new-requests" style="font-size: 36px; margin: 10px 0; color: #0ea5e9;">0</h2>
+                        <p style="font-weight: 600; color: #64748b;">Нові заявки</p>
+                    </div>
+                    <div class="card" style="margin-bottom: 0; text-align: center; border-bottom: 4px solid #10b981;">
+                        <h2 id="stat-total-requests" style="font-size: 36px; margin: 10px 0; color: #10b981;">0</h2>
+                        <p style="font-weight: 600; color: #64748b;">Всього заявок</p>
+                    </div>
+                    <div class="card" style="margin-bottom: 0; text-align: center; border-bottom: 4px solid #f59e0b;">
+                        <h2 id="stat-news-count" style="font-size: 36px; margin: 10px 0; color: #f59e0b;">0</h2>
+                        <p style="font-weight: 600; color: #64748b;">Статей у блозі</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🚀 Швидкі дії</h3>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="action-btn" onclick="openTab('tab-news')">+ Створити новину</button>
+                        <button class="action-btn" style="background: #10b981;" onclick="openTab('tab-requests')">Переглянути замовлення</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-hero" class="tab-content">
                 <h1>Текст на головній</h1>
                 <div class="card">
                     <form id="hero-form">
@@ -315,6 +342,29 @@
             return response;
         }
         
+        async function updateDashboardStats() {
+            try {
+                // Отримуємо заявки
+                const reqRes = await fetchProtected(`${API_URL}/requests`);
+                const requests = await reqRes.json();
+                
+                // Отримуємо новини
+                const newsRes = await fetch(`${API_URL}/news`);
+                const news = await newsRes.json();
+
+                // Рахуємо
+                const totalReq = requests.length;
+                const newReq = requests.filter(r => r.status === 'Нова' || !r.status).length;
+                const totalNews = news.length;
+
+                // Оновлюємо цифри на екрані
+                document.getElementById('stat-total-requests').textContent = totalReq;
+                document.getElementById('stat-new-requests').textContent = newReq;
+                document.getElementById('stat-news-count').textContent = totalNews;
+
+            } catch(e) { console.error("Помилка статистики", e); }
+        }
+
         // --- ЗМІНА ЛОГІНУ ТА ПАРОЛЮ ---
         async function updateAdminCredentials() {
             const current_password = document.getElementById('sec-current-password').value;
@@ -347,7 +397,7 @@
             } catch (e) {
                 showStatus('Помилка! Можливо, ви ввели неправильний старий пароль.', true);
             }
-        }
+        }   
         
         function openTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
