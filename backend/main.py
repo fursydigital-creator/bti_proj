@@ -13,6 +13,7 @@ import uuid
 from datetime import datetime
 import urllib.request
 import urllib.parse
+import ssl
 
 # --- НАЛАШТУВАННЯ БЕЗПЕКИ (JWT) ---
 SECRET_KEY = "bti_super_secret_key_2026"
@@ -31,10 +32,14 @@ TELEGRAM_BOT_TOKEN = "8524963043:AAEz2VDpcBtlR5V1FdkOiqMJhd8JWBOCiwU"
 TELEGRAM_CHAT_ID = "556963147"
 
 def send_telegram_message(text: str):
-    if not TELEGRAM_BOT_TOKEN or TELEGRAM_BOT_TOKEN == "ВСТАВТЕ_СЮДИ_ВАШ_ТОКЕН_ВІД_BOTFATHER":
+    if not TELEGRAM_BOT_TOKEN or TELEGRAM_BOT_TOKEN:
         return # Якщо токен не вказано, просто ігноруємо
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     data = urllib.parse.urlencode({'chat_id': TELEGRAM_CHAT_ID, 'text': text}).encode('utf-8')
+    # Створюємо контекст, який каже Python ігнорувати перевірку SSL-сертифіката
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
     try:
         urllib.request.urlopen(url, data=data)
     except Exception as e:
@@ -300,7 +305,7 @@ def delete_document(doc_id: int, db: Session = Depends(get_db), token: dict = De
 @app.post("/api/requests")
 def create_request(req: RequestCreate, db: Session = Depends(get_db)):
     now = datetime.now().strftime("%d.%m.%Y %H:%M")
-    new_req = RequestItem(name=req.name, email=req.email, message=req.message, date_str=now)
+    new_req = RequestItem(name=req.name, phone=req.phone, message=req.message, date_str=now)
     db.add(new_req)
     db.commit()
 
