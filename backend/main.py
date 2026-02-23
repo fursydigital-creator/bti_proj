@@ -4,6 +4,7 @@ from fastapi import (
     FastAPI,
     File,
     HTTPException,
+    Request,
     Response,
     Security,
     UploadFile,
@@ -313,7 +314,7 @@ def get_sitemap(db: Session = Depends(get_db)):
 
 # 8. ЗАВАНТАЖЕННЯ ФАЙЛІВ (ОКРЕМО КАРТИНКИ ТА ДОКУМЕНТИ)
 @app.post("/api/upload")
-def upload_image(file: UploadFile = File(...), token: dict = Depends(verify_token)):
+def upload_image(file: UploadFile = File(...), request: Request = None, token: dict = Depends(verify_token)):
     try:
         image = Image.open(io.BytesIO(file.file.read()))
         if image.mode in ("RGBA", "P"):
@@ -322,13 +323,17 @@ def upload_image(file: UploadFile = File(...), token: dict = Depends(verify_toke
         filename = f"{uuid.uuid4().hex}.webp"
         path = f"uploads/{filename}"
         image.save(path, "WEBP", quality=80, method=4)
-        return {"url": f"/uploads/{filename}"}  # Відносний шлях
+        
+        # Побудуємо повний URL
+        base_url = str(request.base_url).rstrip('/')
+        full_url = f"{base_url}/uploads/{filename}"
+        return {"url": full_url}
     except Exception:
         raise HTTPException(status_code=400, detail="Помилка обробки зображення")
 
 
 @app.post("/api/upload/document")
-def upload_doc(file: UploadFile = File(...), token: dict = Depends(verify_token)):
+def upload_doc(file: UploadFile = File(...), request: Request = None, token: dict = Depends(verify_token)):
     # Проверка расширения файла
     allowed_extensions = {"pdf", "doc", "docx", "xls", "xlsx"}
     ext = file.filename.split(".")[-1].lower()
@@ -345,7 +350,11 @@ def upload_doc(file: UploadFile = File(...), token: dict = Depends(verify_token)
     filename = f"{uuid.uuid4().hex}.{ext}"
     with open(f"uploads/{filename}", "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-    return {"url": f"/uploads/{filename}"}
+    
+    # Побудуємо повний URL
+    base_url = str(request.base_url).rstrip('/')
+    full_url = f"{base_url}/uploads/{filename}"
+    return {"url": full_url}
 
 
 # 9. КЕРУВАННЯ КОНТЕНТОМ (FAQ, News, Services, Settings)
