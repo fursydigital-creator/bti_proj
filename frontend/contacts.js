@@ -1,11 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    // Ховаємо змінну всередину, щоб не було конфліктів з index.html
-    const API = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
-        ? 'http://127.0.0.1:8000/api' 
-        : '/api';
-
     try {
-        const response = await fetch(`${API}/settings`);
+        const response = await fetch(`${API_URL}/settings`);
         
         if (!response.ok) throw new Error("Помилка API");
         

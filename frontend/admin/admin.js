@@ -1,8 +1,4 @@
-
-const API_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
-    ? 'http://127.0.0.1:8000/api' 
-    : '/api';
-        const ITEMS_PER_PAGE = 5; 
+const ITEMS_PER_PAGE = 5; 
 
         function renderPagination(totalItems, currentPage, containerId, callbackFunc) {
             const container = document.getElementById(containerId);
@@ -20,7 +16,7 @@ const API_URL = (window.location.hostname === '127.0.0.1' || window.location.hos
             }
         }
         
-        var quill = new Quill('#quill-editor', {
+        const quill = new Quill('#quill-editor', {
             theme: 'snow',
             placeholder: 'Напишіть вашу статтю тут...',
             modules: {
@@ -251,7 +247,7 @@ const API_URL = (window.location.hostname === '127.0.0.1' || window.location.hos
         
         async function deleteFaq(id) { 
             if(confirm("Точно видалити?")) { 
-                try { await fetchProtected(`${API_URL}/faqs/${id}`, { method: 'DELETE' }); showStatus('Видалено!'); loadFaqs(); } catch(e) {} 
+                try { await fetchProtected(`${API_URL}/faqs/${id}`, { method: 'DELETE' }); showStatus('Видалено!'); loadFaqs(); } catch(e) { showStatus('Помилка з\'єднання з сервером', true); } 
             } 
         }
         
@@ -263,14 +259,8 @@ const API_URL = (window.location.hostname === '127.0.0.1' || window.location.hos
                 document.getElementById('faq-a').value = ''; 
                 showStatus('Питання додано!'); 
                 loadFaqs(); 
-            } catch(e) {}
+            } catch(e) { showStatus('Помилка з\'єднання з сервером', true); }
         });
-        
-        async function deleteFaq(id) { 
-            if(confirm("Точно видалити?")) { 
-                try { await fetchProtected(`${API_URL}/faqs/${id}`, { method: 'DELETE' }); showStatus('Видалено!'); loadFaqs(); } catch(e) {} 
-            } 
-        }
 
         let currentSlug = '';
         async function loadServiceData() {
@@ -304,7 +294,7 @@ const API_URL = (window.location.hostname === '127.0.0.1' || window.location.hos
             try { 
                 await fetchProtected(`${API_URL}/services/${currentSlug}`, { method: 'POST', body: JSON.stringify({ title: title, table_data: tableData }) }); 
                 showStatus('Таблицю успішно збережено в базі!'); 
-            } catch (error) { showStatus('Помилка збереження', true); }
+            } catch (error) { showStatus('Помилка з\'єднання з сервером', true); }
         }
 
         let editingNewsId = null; 
@@ -386,6 +376,7 @@ const API_URL = (window.location.hostname === '127.0.0.1' || window.location.hos
                 method: 'POST',
                 body: formData
             });
+            if (!res.ok) throw new Error('Помилка завантаження');
             const data = await res.json();
             return data.url;
         }
@@ -446,7 +437,7 @@ const API_URL = (window.location.hostname === '127.0.0.1' || window.location.hos
                     if (editingNewsId === id) cancelNewsEdit();
                     showStatus('Видалено!');
                     loadNews();
-                } catch(e) {}
+                } catch(e) { showStatus('Помилка з\'єднання з сервером', true); }
             }
         }
 
@@ -516,7 +507,7 @@ const API_URL = (window.location.hostname === '127.0.0.1' || window.location.hos
                     await fetchProtected(`${API_URL}/documents/${id}`, { method: 'DELETE' });
                     showStatus('Видалено!');
                     loadDocuments();
-                } catch(e) {}
+                } catch(e) { showStatus('Помилка з\'єднання з сервером', true); }
             }
         }
 
