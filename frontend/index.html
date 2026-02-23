@@ -3,19 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>БТІ Фурси | Технічна інвентаризація та нерухомість</title>
-    <meta name="description" content="Бюро технічної інвентаризації. Техпаспорт, оцінка, узаконення.">
+    <title>БТІ Фурси та Біла Церква | Техпаспорт і оцінка нерухомості</title>
+    <meta name="description" content="Офіційне БТІ. Швидке оформлення технічних паспортів, оцінка майна та введення в експлуатацію. Працюємо у Фурсах, Білій Церкві та Білоцерківському районі.">
     <link rel="icon" type="image/png" href="img/favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet"
     href="style.css">
-    <meta name="description" content="Швидке та професійне оформлення технічних паспортів, оцінка майна та будівельні паспорти у Фурсах та районі.">
     
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://vash-domen.com.ua/">
     <meta property="og:title" content="БТІ Фурси | Технічна інвентаризація та нерухомість">
     <meta property="og:description" content="Офіційне виготовлення техпаспортів. Швидко, без черг та зайвої бюрократії.">
     <meta property="og:image" content="https://vash-domen.com.ua/uploads/vasha-kartynka.webp">
+    
+    <!-- SCHEMA.ORG STRUCTURED DATA FOR GEO -->
+    <!-- LocalBusiness Entity (Entity Authority для глобального графу) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "GovernmentOffice",
+      "@id": "https://bti-fursy.com.ua/#organization",
+      "name": "БТІ Фурси",
+      "alternateName": "Комунальне підприємство «Бюро технічної інвентаризації»",
+      "url": "https://bti-fursy.com.ua/",
+      "logo": "https://bti-fursy.com.ua/img/logo.png",
+      "image": "https://bti-fursy.com.ua/img/logo.png",
+      "description": "Професійна технічна інвентаризація об'єктів нерухомості, виготовлення технічних паспортів та оцінка майна у Фурсах, Білій Церкві та Білоцерківському районі.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Фурси",
+        "addressRegion": "Київська область",
+        "addressCountry": "UA"
+      },
+      "areaServed": [
+        {
+          "@type": "City",
+          "name": "Фурси"
+        },
+        {
+          "@type": "City",
+          "name": "Біла Церква"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Білоцерківський район",
+          "addressRegion": "Київська область",
+          "addressCountry": "UA"
+        }
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "areaServed": [
+          "UA"
+        ],
+        "availableLanguage": "Ukrainian"
+      },
+      "sameAs": [
+        "https://t.me/bti_fursy",
+        "https://viber.click/bti_fursy"
+      ]
+    }
+    </script>
 </head>
 
 <body>
@@ -43,7 +92,7 @@
         <div class="container">
             <h1>Бюро Технічної Інвентаризації</h1>
             <p id="hero-subtitle">
-                Завантаження...
+                Професійна технічна інвентаризація та узаконення нерухомості із сертифікованими інженерами. 15+ років досвіду.
             </p>
             <div class="hero-buttons">
                 <button class="btn-base btn-main" onclick="document.getElementById('contacts').scrollIntoView({behavior: 'smooth'})">Замовити послугу</button>
@@ -65,6 +114,9 @@
                     </p>
                     <p class="about-text">
                         Ми відійшли від застарілих бюрократичних процедур. При наданні послуг ми враховуємо всі технічні та юридичні чинники, вирішуючи питання клієнтів швидко та прозоро.
+                    </p>
+                    <p class="about-text">
+                        Надаємо послуги технічної інвентаризації для мешканців Фурсівської громади, м. <strong>Біла Церква</strong> та всього <strong>Білоцерківського району</strong>. Наші інженери безкоштовно виїжджають на об'єкти та здійснюють виміри. Готові, зареєстровані в ЄДЕССБ документи доставляємо особисто або видаємо в офісі у Фурсах (15-20 хв від центру Білої Церкви).
                     </p>
                     
                     <ul class="about-features">
@@ -308,6 +360,22 @@
 
     <footer>
         <div class="container">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; padding-bottom: 30px; border-bottom: 1px solid #e0e0e0;">
+                <div>
+                    <h3 style="color: var(--primary-color); margin-bottom: 10px; font-size: 14px;">Послуги за містами</h3>
+                    <ul style="list-style: none;">
+                        <li><a href="bti-bila-tserkva.html" style="color: #666; font-size: 14px; text-decoration: none; transition: 0.3s;">БТІ у Білій Церкві →</a></li>
+                        <li><a href="index.html#contacts" style="color: #666; font-size: 14px; text-decoration: none; transition: 0.3s;">Контакти базової фірми</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 style="color: var(--primary-color); margin-bottom: 10px; font-size: 14px;">Навігація</h3>
+                    <ul style="list-style: none;">
+                        <li><a href="index.html" style="color: #666; font-size: 14px; text-decoration: none; transition: 0.3s;">Головна →</a></li>
+                        <li><a href="index.html#services" style="color: #666; font-size: 14px; text-decoration: none; transition: 0.3s;">Всі послуги</a></li>
+                    </ul>
+                </div>
+            </div>
             <div class="copyright">
                 &copy; 2026 Комунальне підприємство «Бюро технічної інвентаризації». Всі права захищені.
             </div>
@@ -393,12 +461,45 @@
                 const res = await fetch(`${API_URL}/faqs`);
                 const faqs = await res.json();
                 const wrapper = document.getElementById('faq-wrapper');
-                let html = '';
-                faqs.forEach(f => {
-                    html += `<div class="faq-item"><div class="faq-question">${f.question}</div><div class="faq-answer"><div class="faq-content-inner">${f.answer}</div></div></div>`;
+                
+                // Масив для збору даних під JSON-LD
+                const schemaEntities = [];
+                
+                // Використовуємо requestAnimationFrame для оптимізації DOM оновлень
+                requestAnimationFrame(() => {
+                    let html = '';
+                    
+                    faqs.forEach(f => {
+                        html += `<div class="faq-item"><div class="faq-question">${f.question}</div><div class="faq-answer"><div class="faq-content-inner">${f.answer}</div></div></div>`;
+                        
+                        // Очищення від HTML тегів для Schema
+                        const plainTextAnswer = f.answer.replace(/(<([^>]+)>)/gi, "");
+                        
+                        schemaEntities.push({
+                            "@type": "Question",
+                            "name": f.question,
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": plainTextAnswer
+                            }
+                        });
+                    });
+                    
+                    wrapper.innerHTML = html;
+                    initAccordion(); // Активуємо кліки після завантаження
+                    
+                    // Динамічна ін'єкція FAQPage Schema у глобальний граф знань
+                    if (schemaEntities.length > 0) {
+                        const script = document.createElement('script');
+                        script.type = "application/ld+json";
+                        script.text = JSON.stringify({
+                            "@context": "https://schema.org",
+                            "@type": "FAQPage",
+                            "mainEntity": schemaEntities
+                        });
+                        document.head.appendChild(script);
+                    }
                 });
-                wrapper.innerHTML = html;
-                initAccordion(); // Активуємо кліки після завантаження
             } catch (e) { console.error("Помилка FAQ:", e); }
         }
 
@@ -413,28 +514,31 @@
                     return;
                 }
 
-                let html = '';
-                // Беремо лише 3 останні новини для головної сторінки
-                const topNews = newsData.slice(0, 3);
-                
-                topNews.forEach(n => {
-                    // Якщо картинки немає, ставимо заглушку
-                    const img = n.image_url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop';
-                    html += `
-                    <article class="news-card">
-                        <div class="news-img-wrapper">
-                            <img src="${img}" alt="Фото новини">
-                            <span class="news-tag">${n.tag}</span>
-                        </div>
-                        <div class="news-content">
-                            <div class="news-meta">${n.date_str}</div>
-                            <h3>${n.title}</h3>
-                            <p>${n.preview}</p>
-                            <a href="article.html?id=${n.id}" class="news-link">Читати далі →</a>
-                        </div>
-                    </article>`;
+                // Оптимізація DOM оновлень через requestAnimationFrame
+                requestAnimationFrame(() => {
+                    let html = '';
+                    // Беремо лише 3 останні новини для головної сторінки
+                    const topNews = newsData.slice(0, 3);
+                    
+                    topNews.forEach(n => {
+                        // Якщо картинки немає, ставимо заглушку
+                        const img = n.image_url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop';
+                        html += `
+                        <article class="news-card">
+                            <div class="news-img-wrapper">
+                                <img src="${img}" alt="Фото новини">
+                                <span class="news-tag">${n.tag}</span>
+                            </div>
+                            <div class="news-content">
+                                <div class="news-meta">${n.date_str}</div>
+                                <h3>${n.title}</h3>
+                                <p>${n.preview}</p>
+                                <a href="article.html?id=${n.id}" class="news-link">Читати далі →</a>
+                            </div>
+                        </article>`;
+                    });
+                    container.innerHTML = html;
                 });
-                container.innerHTML = html;
             } catch (e) { console.error("Помилка Новин:", e); }
         }
 
@@ -475,20 +579,23 @@
                     return;
                 }
 
-                let html = '';
-                docsData.forEach(d => {
-                    // Стандартна красива іконка для всіх документів
-                    html += `
-                    <a href="${d.file_url}" target="_blank" class="doc-card">
-                        <div class="doc-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                        </div>
-                        <h3 class="doc-title">${d.title}</h3>
-                        <span class="doc-type">${d.file_type}</span>
-                        <span class="doc-btn">Завантажити</span>
-                    </a>`;
+                // Оптимізація DOM оновлень через requestAnimationFrame
+                requestAnimationFrame(() => {
+                    let html = '';
+                    docsData.forEach(d => {
+                        // Стандартна красива іконка для всіх документів
+                        html += `
+                        <a href="${d.file_url}" target="_blank" class="doc-card">
+                            <div class="doc-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            </div>
+                            <h3 class="doc-title">${d.title}</h3>
+                            <span class="doc-type">${d.file_type}</span>
+                            <span class="doc-btn">Завантажити</span>
+                        </a>`;
+                    });
+                    container.innerHTML = html;
                 });
-                container.innerHTML = html;
             } catch (e) { console.error("Помилка Документів:", e); }
         }
     </script>

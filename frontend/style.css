@@ -974,3 +974,16 @@ html {
 .news-content ul { list-style-type: disc; }
 .news-content ol { list-style-type: decimal; }
 .news-content li { margin-bottom: 5px; display: list-item; }
+
+/* --- ОПТИМІЗАЦІЯ РЕНДЕРИНГУ (Content Visibility) --- */
+/* Мінімізація часу обчислення стилів для блоків поза екраном */
+#faq, #news, #advantages, #downloads {
+    content-visibility: auto;
+    contain-intrinsic-size: 500px; /* Приблизна висота блоку для плавного скролу */
+}
+
+/* Оптимізація для FAQ елементів */
+.faq-item {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 80px;
+}
