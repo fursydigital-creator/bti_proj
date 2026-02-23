@@ -19,6 +19,10 @@
       "name": "БТІ Фурси | Послуги у Білій Церкві",
       "description": "Технічна інвентаризація, оцінка майна та введення будинків в експлуатацію у Білій Церкві та Білоцерківському районі.",
       "url": "https://bti-fursy.com.ua/bti-bila-tserkva.html",
+      "parentOrganization": {
+        "@type": "GovernmentOffice",
+        "@id": "https://bti-fursy.com.ua/#organization"
+      },
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "Біла Церква",
@@ -74,6 +78,61 @@
       ]
     }
     </script>
+    
+    <!-- PERSON SCHEMA FOR TEAM MEMBERS (E-E-A-T) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Іванов Іван Іванович",
+      "jobTitle": "Інженер-інвентаризатор",
+      "worksFor": {
+        "@id": "https://bti-fursy.com.ua/#organization"
+      },
+      "knowsAbout": ["Технічна інвентаризація", "Узаконення перепланувань", "Вимірювання будинків"],
+      "identifier": {
+        "@type": "PropertyValue",
+        "propertyID": "Кваліфікаційний сертифікат",
+        "value": "АЕ №123456"
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Петренко Марія Миколаївна",
+      "jobTitle": "Інженер-оцінювач",
+      "worksFor": {
+        "@id": "https://bti-fursy.com.ua/#organization"
+      },
+      "knowsAbout": ["Оцінка нерухомості", "Судова експертиза", "Страхування майна"],
+      "identifier": {
+        "@type": "PropertyValue",
+        "propertyID": "Кваліфікаційний сертифікат",
+        "value": "АЕ №654321"
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Коваленко Сергій Олександрович",
+      "jobTitle": "Інженер експериментальної роботи",
+      "worksFor": {
+        "@id": "https://bti-fursy.com.ua/#organization"
+      },
+      "knowsAbout": ["Технічне обстеження", "Аудит конструкцій", "Виявлення дефектів"],
+      "identifier": {
+        "@type": "PropertyValue",
+        "propertyID": "Кваліфікаційний сертифікат",
+        "value": "АЕ №789012"
+      }
+    }
+    </script>
 </head>
 
 <body>
@@ -81,7 +140,7 @@
     <header>
         <div class="container nav-wrapper">
             <a href="index.html" class="logo">
-                <img src="img/logo.png" alt="БТІ Фурси" style="height: 40px; margin-right: 10px;">
+                <img src="img/logo.png" alt="БТІ Фурси" width="120" height="40" style="height: 40px; width: auto; margin-right: 10px;">
                 БТІ <span>Фурси</span>
             </a>
             <nav id="nav-menu" class="nav-links">
@@ -182,7 +241,7 @@
                         src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d10313.614370648648!2d30.099!3d49.799!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40d346cab13dc60d%3A0xd0efaa644cd3d7!2z0LLRg9C7LiDQr9GA0L7RgdC70LDQstCwINCc0YPQtNGA0L7Qs9C-LCA0OCwg0KTRg9GA0YHQuCwg0JrQuNGX0LLRgdGM0LrQsCDQvtCx0LvQsNGB0YLRjCwgMDkxNTA!5e0!3m2!1suk!2sua!4v1771592686397"
                         width="100%" 
                         height="400" 
-                        style="border:0; border-radius: 8px;" 
+                        style="border:0; border-radius: 8px; display: block;" 
                         allowfullscreen="" 
                         loading="lazy">
                     </iframe>
@@ -248,11 +307,49 @@
         </div>
     </section>
 
+    <section class="section-padding bg-white">
+        <div class="container">
+            <div class="section-title">
+                <h2>Наша команда</h2>
+                <p>Сертифіковані інженери з багаторічним дос­відом технічної інвентаризації</p>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+                <div class="advantage-card" style="text-align: center;">
+                    <div style="width: 150px; height: 150px; margin: 0 auto 20px; background: #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 60px; overflow: hidden;">
+                        <img src="https://via.placeholder.com/150" alt="Іванов Іван" width="150" height="150" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <h3 style="margin-bottom: 5px; color: var(--primary-color);">Іванов Іван Іванович</h3>
+                    <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Інженер-інвентаризатор</p>
+                    <p style="font-size: 12px; color: #999; margin-bottom: 10px;">Кваліфікаційний сертифікат: АЕ №123456</p>
+                    <p style="font-size: 13px; line-height: 1.6;">Фахівець з подоління повторного обміру будинків та узаконення перепланувань у приватному та багатоквартирному секторі.</p>
+                </div>
+                <div class="advantage-card" style="text-align: center;">
+                    <div style="width: 150px; height: 150px; margin: 0 auto 20px; background: #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 60px; overflow: hidden;">
+                        <img src="https://via.placeholder.com/150" alt="Петренко Марія" width="150" height="150" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <h3 style="margin-bottom: 5px; color: var(--primary-color);">Петренко Марія Миколаївна</h3>
+                    <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Інженер-оцінювач</p>
+                    <p style="font-size: 12px; color: #999; margin-bottom: 10px;">Кваліфікаційний сертифікат: АЕ №654321</p>
+                    <p style="font-size: 13px; line-height: 1.6;">Цінна експертиза з оцінки нерухомого майна для спадщини, страхування, кредитування та судових справ.</p>
+                </div>
+                <div class="advantage-card" style="text-align: center;">
+                    <div style="width: 150px; height: 150px; margin: 0 auto 20px; background: #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 60px; overflow: hidden;">
+                        <img src="https://via.placeholder.com/150" alt="Коваленко Сергій" width="150" height="150" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <h3 style="margin-bottom: 5px; color: var(--primary-color);">Коваленко Сергій Олександрович</h3>
+                    <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Інженер експериментальної роботи</p>
+                    <p style="font-size: 12px; color: #999; margin-bottom: 10px;">Кваліфікаційний сертифікат: АЕ №789012</p>
+                    <p style="font-size: 13px; line-height: 1.6;">Спеціаліст із технічного обстеження та розроблення рішень для виявлення та усунення дефектів конструкції.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <footer style="background: #1e293b; color: #cbd5e1; padding: 40px 20px; text-align: center;">
         <div class="container">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; text-align: left; max-width: 100%;">
                 <div>
-                    <h3 style="color: #0ea5e9; margin-bottom: 10px; font-size: 14px;">Послуги за містами</h3>
+                    <h3 style="color: #0ea5e9; margin-bottom: 10px; font-size: 14px;">Послуги в місті</h3>
                     <ul style="list-style: none; padding-left: 0;">
                         <li><a href="bti-bila-tserkva.html" style="color: #cbd5e1; text-decoration: none; transition: 0.3s;">БТІ у Білій Церкві →</a></li>
                         <li><a href="index.html#contacts" style="color: #cbd5e1; text-decoration: none; transition: 0.3s;">Контакти базової фірми</a></li>

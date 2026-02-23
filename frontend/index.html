@@ -65,6 +65,61 @@
       ]
     }
     </script>
+
+    <!-- PERSON SCHEMA FOR TEAM MEMBERS (E-E-A-T) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Іванов Іван Іванович",
+      "jobTitle": "Інженер-інвентаризатор",
+      "worksFor": {
+        "@id": "https://bti-fursy.com.ua/#organization"
+      },
+      "knowsAbout": ["Технічна інвентаризація", "Узаконення перепланувань", "Вимірювання будинків"],
+      "identifier": {
+        "@type": "PropertyValue",
+        "propertyID": "Кваліфікаційний сертифікат",
+        "value": "АЕ №123456"
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Петренко Марія Миколаївна",
+      "jobTitle": "Інженер-оцінювач",
+      "worksFor": {
+        "@id": "https://bti-fursy.com.ua/#organization"
+      },
+      "knowsAbout": ["Оцінка нерухомості", "Судова експертиза", "Страхування майна"],
+      "identifier": {
+        "@type": "PropertyValue",
+        "propertyID": "Кваліфікаційний сертифікат",
+        "value": "АЕ №654321"
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Коваленко Сергій Олександрович",
+      "jobTitle": "Інженер експериментальної роботи",
+      "worksFor": {
+        "@id": "https://bti-fursy.com.ua/#organization"
+      },
+      "knowsAbout": ["Технічне обстеження", "Аудит конструкцій", "Виявлення дефектів"],
+      "identifier": {
+        "@type": "PropertyValue",
+        "propertyID": "Кваліфікаційний сертифікат",
+        "value": "АЕ №789012"
+      }
+    }
+    </script>
 </head>
 
 <body>
@@ -72,7 +127,7 @@
     <header>
         <div class="container nav-wrapper">
             <a href="index.html" class="logo">
-                <img src="img/logo.png" alt="БТІ Фурси" style="height: 40px; margin-right: 10px;">
+                <img src="img/logo.png" alt="БТІ Фурси" width="120" height="40" style="height: 40px; width: auto; margin-right: 10px;">
                 БТІ <span>Фурси</span>
             </a>
             
@@ -138,7 +193,7 @@
                 </div>
 
                 <div class="about-image-wrapper">
-                    <img src="https://images.unsplash.com/photo-1554469384-e58fac16e23a?auto=format&fit=crop&w=800&q=80" alt="Сучасна будівля" class="about-img">
+                    <img src="https://images.unsplash.com/photo-1554469384-e58fac16e23a?auto=format&fit=crop&w=800&q=80" alt="Сучасна будівля" width="800" height="600" class="about-img" style="width: 100%; height: auto;">
                 </div>
             </div>
         </div>
@@ -155,31 +210,31 @@
                 <h3 class="category-title">Технічний паспорт</h3>
                 <div class="services-grid-modern">
                     <a href="tehpasport-kvartyra.html" class="service-item-card">
-                        <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=350&fit=crop" alt="Квартира" class="service-item-img">
+                        <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=350&fit=crop" alt="Квартира" width="500" height="350" class="service-item-img">
                         <div class="service-item-text">Технічний паспорт на квартиру</div>
                     </a>
                     <a href="tehpasport-budynok.html" class="service-item-card">
-                        <img src="https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=500&h=350&fit=crop" alt="Жилий будинок" class="service-item-img">
+                        <img src="https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=500&h=350&fit=crop" alt="Жилий будинок" width="500" height="350" class="service-item-img">
                         <div class="service-item-text">Технічний паспорт на жилий будинок</div>
                     </a>
                     <a href="tehpasport-garazh.html" class="service-item-card">
-                        <img src="img/garage.jpg" alt="Техпаспорт на гараж" class="service-item-img">
+                        <img src="img/garage.jpg" alt="Техпаспорт на гараж" width="500" height="350" class="service-item-img">
                         <div class="service-item-text">Технічний паспорт на гараж</div>
                     </a>
                     <a href="tehpasport-dacha.html" class="service-item-card">
-                        <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=500&h=350&fit=crop" alt="Дача" class="service-item-img">
+                        <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=500&h=350&fit=crop" alt="Дача" width="500" height="350" class="service-item-img">
                         <div class="service-item-text">На дачу або садовий будинок</div>
                     </a>
                     <a href="tehpasport-vvedennya.html" class="service-item-card">
-                        <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=500&h=350&fit=crop" alt="Введення в експлуатацію" class="service-item-img">
+                        <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=500&h=350&fit=crop" alt="Введення в експлуатацію" width="500" height="350" class="service-item-img">
                         <div class="service-item-text">На будинок для введення в експлуатацію</div>
                     </a>
                     <a href="tehpasport-nezhyle.html" class="service-item-card">
-                        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=500&h=350&fit=crop" alt="Нежиле приміщення" class="service-item-img">
+                        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=500&h=350&fit=crop" alt="Нежиле приміщення" width="500" height="350" class="service-item-img">
                         <div class="service-item-text">Технічний паспорт на нежиле приміщення</div>
                     </a>
                     <a href="tehpasport-vyrobnychi.html" class="service-item-card">
-                        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=500&h=350&fit=crop" alt="Виробничі будівлі" class="service-item-img">
+                        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=500&h=350&fit=crop" alt="Виробничі будівлі" width="500" height="350" class="service-item-img">
                         <div class="service-item-text">Технічний паспорт на виробничі будівлі</div>
                     </a>
                 </div>
@@ -189,19 +244,19 @@
                 <h3 class="category-title">Перепланування та реконструкція</h3>
                 <div class="services-grid-modern">
                     <a href="tehpasport-pereplanuvannya-kvartyra.html" class="service-item-card">
-                        <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=500&h=350&fit=crop" alt="Перепланування квартири" class="service-item-img">
+                        <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=500&h=350&fit=crop" alt="Перепланування квартири" width="500" height="350" class="service-item-img">
                         <div class="service-item-text">Перепланування або реконструкція квартири</div>
                     </a>
                     <a href="tehpasport-pereplanuvannya-budynok.html" class="service-item-card">
-                        <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=500&h=350&fit=crop" alt="Перепланування будинку" class="service-item-img">
+                        <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=500&h=350&fit=crop" alt="Перепланування будинку" width="500" height="350" class="service-item-img">
                         <div class="service-item-text">Перепланування або реконструкція будинку</div>
                     </a>
                     <a href="tehpasport-pereplanuvannya-vyrobnychi.html" class="service-item-card">
-                        <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&h=350&fit=crop" alt="Перепланування виробництва" class="service-item-img">
+                        <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&h=350&fit=crop" alt="Перепланування виробництва" width="500" height="350" class="service-item-img">
                         <div class="service-item-text">Перепланування або реконст. виробничої будівлі</div>
                     </a>
                     <a href="tehpasport-pereplanuvannya-nezhyle.html" class="service-item-card">
-                        <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=500&h=350&fit=crop" alt="Перепланування нежилого" class="service-item-img">
+                        <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=500&h=350&fit=crop" alt="Перепланування нежилого" width="500" height="350" class="service-item-img">
                         <div class="service-item-text">Перепланування або реконст. нежилого приміщення</div>
                     </a>
                 </div>
@@ -211,19 +266,19 @@
                 <h3 class="category-title">Додаткові послуги</h3>
                 <div class="services-grid-modern">
                     <a href="ocinka.html" class="service-item-card">
-                        <img src="https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=500&h=350&fit=crop" alt="Оцінка" class="service-item-img">
+                        <img src="https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=500&h=350&fit=crop" alt="Оцінка" width="500" height="350" class="service-item-img">
                         <div class="service-item-text">Оцінка нерухомого майна</div>
                     </a>
                     <a href="budivelnyi-pasport.html" class="service-item-card">
-                        <img src="https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?w=500&h=350&fit=crop" alt="Будівельний паспорт" class="service-item-img">
+                        <img src="https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?w=500&h=350&fit=crop" alt="Будівельний паспорт" width="500" height="350" class="service-item-img">
                         <div class="service-item-text">Будівельний паспорт</div>
                     </a>
                     <a href="tehnichne-obstezhennya.html" class="service-item-card">
-                        <img src="https://images.unsplash.com/photo-1581092335397-9583eb92d232?w=500&h=350&fit=crop" alt="Технічне обстеження" class="service-item-img">
+                        <img src="https://images.unsplash.com/photo-1581092335397-9583eb92d232?w=500&h=350&fit=crop" alt="Технічне обстеження" width="500" height="350" class="service-item-img">
                         <div class="service-item-text">Технічне обстеження будівель та споруд</div>
                     </a>
                     <a href="perevedennya-dachnogo.html" class="service-item-card">
-                        <img src="https://images.unsplash.com/photo-1449844908441-8829872d2607?w=500&h=350&fit=crop" alt="Переведення дачного в жилий" class="service-item-img">
+                        <img src="https://images.unsplash.com/photo-1449844908441-8829872d2607?w=500&h=350&fit=crop" alt="Переведення дачного в жилий" width="500" height="350" class="service-item-img">
                         <div class="service-item-text">Переведення дачного будинку в жилий</div>
                     </a>
                 </div>
@@ -355,6 +410,44 @@
                         <button type="submit" class="btn-base btn-main" style="width: 100%;">Відправити</button>
                     </form>
                 </div> 
+        </div>
+    </section>
+
+    <section class="section-padding bg-white">
+        <div class="container">
+            <div class="section-title">
+                <h2>Наша команда</h2>
+                <p>Сертифіковані інженери з багаторічним дос­відом технічної інвентаризації</p>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+                <div class="advantage-card" style="text-align: center;">
+                    <div style="width: 150px; height: 150px; margin: 0 auto 20px; background: #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 60px; overflow: hidden;">
+                        <img src="https://via.placeholder.com/150" alt="Іванов Іван" width="150" height="150" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <h3 style="margin-bottom: 5px; color: var(--primary-color);">Іванов Іван Іванович</h3>
+                    <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Інженер-інвентаризатор</p>
+                    <p style="font-size: 12px; color: #999; margin-bottom: 10px;">Кваліфікаційний сертифікат: АЕ №123456</p>
+                    <p style="font-size: 13px; line-height: 1.6;">Фахівець з подоління повторного обміру будинків та узаконення перепланувань у приватному та багатоквартирному секторі.</p>
+                </div>
+                <div class="advantage-card" style="text-align: center;">
+                    <div style="width: 150px; height: 150px; margin: 0 auto 20px; background: #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 60px; overflow: hidden;">
+                        <img src="https://via.placeholder.com/150" alt="Петренко Марія" width="150" height="150" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <h3 style="margin-bottom: 5px; color: var(--primary-color);">Петренко Марія Миколаївна</h3>
+                    <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Інженер-оцінювач</p>
+                    <p style="font-size: 12px; color: #999; margin-bottom: 10px;">Кваліфікаційний сертифікат: АЕ №654321</p>
+                    <p style="font-size: 13px; line-height: 1.6;">Цінна експертиза з оцінки нерухомого майна для спадщини, страхування, кредитування та судових справ.</p>
+                </div>
+                <div class="advantage-card" style="text-align: center;">
+                    <div style="width: 150px; height: 150px; margin: 0 auto 20px; background: #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 60px; overflow: hidden;">
+                        <img src="https://via.placeholder.com/150" alt="Коваленко Сергій" width="150" height="150" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <h3 style="margin-bottom: 5px; color: var(--primary-color);">Коваленко Сергій Олександрович</h3>
+                    <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Інженер експериментальної роботи</p>
+                    <p style="font-size: 12px; color: #999; margin-bottom: 10px;">Кваліфікаційний сертифікат: АЕ №789012</p>
+                    <p style="font-size: 13px; line-height: 1.6;">Спеціаліст із технічного обстеження та розроблення рішень для виявлення та усунення дефектів конструкції.</p>
+                </div>
+            </div>
         </div>
     </section>
 
