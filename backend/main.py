@@ -148,6 +148,141 @@ def get_db():
     finally:
         db.close()
 
+
+# 3.5 ІНІЦІАЛІЗАЦІЯ ПОСЛУГ ПРИ ЗАПУСКУ
+def initialize_services():
+    """Ініціалізує всі послуги з типовими цінами при першому запуску"""
+    db = SessionLocal()
+    try:
+        services_data = {
+            "tehpasport-kvartyra": {
+                "title": "Техпаспорт на квартиру",
+                "table_data": [
+                    ["Послуга", "Ціна"],
+                    ["Техпаспорт на квартиру", "550 грн."],
+                ]
+            },
+            "tehpasport-budynok": {
+                "title": "Техпаспорт на жилий будинок",
+                "table_data": [
+                    ["Послуга", "Ціна"],
+                    ["Техпаспорт на жилий будинок", "700 грн."],
+                ]
+            },
+            "tehpasport-garazh": {
+                "title": "Техпаспорт на гараж",
+                "table_data": [
+                    ["Послуга", "Ціна"],
+                    ["Техпаспорт на гараж", "400 грн."],
+                ]
+            },
+            "tehpasport-dacha": {
+                "title": "На дачу або садовий будинок",
+                "table_data": [
+                    ["Послуга", "Ціна"],
+                    ["Техпаспорт на дачу", "500 грн."],
+                ]
+            },
+            "tehpasport-vvedennya": {
+                "title": "На будинок для введення в експлуатацію",
+                "table_data": [
+                    ["Послуга", "Ціна"],
+                    ["Техпаспорт для введення в експлуатацію", "650 грн."],
+                ]
+            },
+            "tehpasport-nezhyle": {
+                "title": "Техпаспорт на нежиле приміщення",
+                "table_data": [
+                    ["Послуга", "Ціна"],
+                    ["Техпаспорт на нежиле приміщення", "600 грн."],
+                ]
+            },
+            "tehpasport-vyrobnychi": {
+                "title": "Техпаспорт на виробничі будівлі",
+                "table_data": [
+                    ["Послуга", "Ціна"],
+                    ["Техпаспорт на виробничу будівлю", "800 грн."],
+                ]
+            },
+            "tehpasport-pereplanuvannya-kvartyra": {
+                "title": "Перепланування квартири",
+                "table_data": [
+                    ["Послуга", "Ціна"],
+                    ["Техпаспорт перепланування квартири", "700 грн."],
+                ]
+            },
+            "tehpasport-pereplanuvannya-budynok": {
+                "title": "Перепланування будинку",
+                "table_data": [
+                    ["Послуга", "Ціна"],
+                    ["Техпаспорт перепланування будинку", "850 грн."],
+                ]
+            },
+            "tehpasport-pereplanuvannya-vyrobnychi": {
+                "title": "Перепланування виробничої будівлі",
+                "table_data": [
+                    ["Послуга", "Ціна"],
+                    ["Техпаспорт перепланування виробничої будівлі", "1000 грн."],
+                ]
+            },
+            "tehpasport-pereplanuvannya-nezhyle": {
+                "title": "Перепланування нежилого приміщення",
+                "table_data": [
+                    ["Послуга", "Ціна"],
+                    ["Техпаспорт перепланування нежилого приміщення", "750 грн."],
+                ]
+            },
+            "ocinka": {
+                "title": "Оцінка нерухомого майна",
+                "table_data": [
+                    ["Послуга", "Ціна"],
+                    ["Оцінка нерухомого майна", "1500 грн."],
+                ]
+            },
+            "budivelnyi-pasport": {
+                "title": "Будівельний паспорт",
+                "table_data": [
+                    ["Послуга", "Ціна"],
+                    ["Будівельний паспорт", "900 грн."],
+                ]
+            },
+            "tehnichne-obstezhennya": {
+                "title": "Технічне обстеження будівель та споруд",
+                "table_data": [
+                    ["Послуга", "Ціна"],
+                    ["Технічне обстеження", "1200 грн."],
+                ]
+            },
+            "perevedennya-dachnogo": {
+                "title": "Переведення дачного будинку в жилий",
+                "table_data": [
+                    ["Послуга", "Ціна"],
+                    ["Переведення дачного будинку в жилий", "2000 грн."],
+                ]
+            },
+        }
+        
+        for slug, data in services_data.items():
+            # Перевіряємо, чи існує вже ця послуга
+            existing = db.query(Service).filter(Service.slug == slug).first()
+            if not existing:
+                new_service = Service(
+                    slug=slug,
+                    title=data["title"],
+                    table_data=data["table_data"]
+                )
+                db.add(new_service)
+        
+        db.commit()
+        print("✓ Послуги ініціалізовано")
+    except Exception as e:
+        print(f"Помилка ініціалізації послуг: {e}")
+    finally:
+        db.close()
+
+
+initialize_services()
+
 # 4. СХЕМИ PYDANTIC
 class LoginData(BaseModel):
     username: str
@@ -479,6 +614,7 @@ def del_faq(
 ):
     db.query(FAQ).filter(FAQ.id == id).delete()
     db.commit()
+    return {"message": "Питання видалено"}
 
 
 @app.post("/api/services/{slug}")
@@ -532,6 +668,7 @@ def del_news(
 ):
     db.query(NewsItem).filter(NewsItem.id == id).delete()
     db.commit()
+    return {"message": "Новину видалено"}
 
 
 @app.post("/api/settings/bulk-update")
@@ -574,6 +711,7 @@ def del_doc(
 ):
     db.query(DocumentItem).filter(DocumentItem.id == id).delete()
     db.commit()
+    return {"message": "Документ видалено"}
 
 
 @app.delete("/api/requests/{id}")
@@ -584,3 +722,4 @@ def del_req(
 ):
     db.query(RequestItem).filter(RequestItem.id == id).delete()
     db.commit()
+    return {"message": "Заявка видалена"}

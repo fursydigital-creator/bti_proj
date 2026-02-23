@@ -511,6 +511,16 @@ const ITEMS_PER_PAGE = 5;
             }
         }
 
+        async function deleteRequest(id) {
+            if(confirm("Ви дійсно хочете видалити цю заявку?")) {
+                try {
+                    await fetchProtected(`${API_URL}/requests/${id}`, { method: 'DELETE' });
+                    showStatus('Видалено!');
+                    loadRequests();
+                } catch(e) { showStatus('Помилка з\'єднання з сервером', true); }
+            }
+        }
+
         // --- ЗАЯВКИ (CRM) ---
         let allRequestsData = [];
         let currentReqPage = 1;

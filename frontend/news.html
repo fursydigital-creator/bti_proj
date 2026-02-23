@@ -12,7 +12,10 @@
 <body>
     <header>
         <div class="container nav-wrapper">
-            <a href="index.html" class="logo">🏢 БТІ<span>Експерт</span></a>
+            <a href="index.html" class="logo">
+                <img src="img/logo.png" alt="БТІ Фурси" style="height: 40px; margin-right: 10px;">
+                БТІ <span>Фурси</span>
+            </a>
             <nav id="nav-menu" class="nav-links">
                 <a href="index.html#about">Про БТІ</a>
                 <a href="index.html#services">Послуги</a>
@@ -53,7 +56,6 @@
     <script src="config.js"></script>
     <script src="contacts.js"></script>
     <script>
-        const API_URL = 'http://127.0.0.1:8000/api';
 
         function toggleMenu() {
             const nav = document.getElementById('nav-menu');

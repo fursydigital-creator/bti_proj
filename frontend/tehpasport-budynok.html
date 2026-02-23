@@ -15,7 +15,8 @@
     <header>
         <div class="container nav-wrapper">
             <a href="index.html" class="logo">
-                🏢 БТІ<span>Експерт</span>
+                <img src="img/logo.png" alt="БТІ Фурси" style="height: 40px; margin-right: 10px;">
+                БТІ <span>Фурси</span>
             </a>
             <nav id="nav-menu" class="nav-links">
                 <a href="index.html#about">Про БТІ</a>
@@ -149,8 +150,7 @@
     <script src="contacts.js"></script>
     <script>
         // Розумне визначення назви сторінки (slug) з URL файлу
-        const PAGE_SLUG = window.location.pathname.split('/').pop().replace('.html', ''); 
-        const API_URL = 'http://127.0.0.1:8000/api';
+        const PAGE_SLUG = window.location.pathname.split('/').pop().replace('.html', '');
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
