@@ -14,16 +14,28 @@ router = APIRouter(prefix="/api", tags=["Auth"])
 
 @router.post("/login")
 def login(data: LoginData, db: Session = Depends(get_db)):
-    db_username = db.query(Setting).filter(Setting.key == "admin_username").first()
-    db_password_hash = db.query(Setting).filter(Setting.key == "admin_password_hash").first()
-
-    correct_username = db_username.value if db_username else os.getenv("ADMIN_USERNAME", "admin")
-
-    if db_password_hash:
-        is_valid = verify_password(data.password, db_password_hash.value)
+    # Спочатку перевіряємо .env (має вищий пріоритет)
+    env_username = os.getenv("ADMIN_USERNAME")
+    env_password = os.getenv("ADMIN_PASSWORD")
+    
+    # Вибираємо логін: спочатку .env, потім БД, потім стандартний
+    if env_username:
+        correct_username = env_username
     else:
-        fallback_password = os.getenv("ADMIN_PASSWORD", "admin2026")
-        is_valid = data.password == fallback_password
+        db_username = db.query(Setting).filter(Setting.key == "admin_username").first()
+        correct_username = db_username.value if db_username else "admin"
+    
+    # Перевірка пароля: спочатку .env, потім БД
+    if env_password:
+        # Якщо в .env встановлений пароль, використовуємо його
+        is_valid = data.password == env_password
+    else:
+        # Якщо .env пустий, перевіряємо БД
+        db_password_hash = db.query(Setting).filter(Setting.key == "admin_password_hash").first()
+        if db_password_hash:
+            is_valid = verify_password(data.password, db_password_hash.value)
+        else:
+            is_valid = False
 
     if data.username == correct_username and is_valid:
         expire = datetime.utcnow() + timedelta(hours=24)
