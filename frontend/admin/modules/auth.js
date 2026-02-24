@@ -37,12 +37,19 @@ export class AuthManager {
         const loginScreen = document.getElementById('login-screen');
         const adminScreen = document.getElementById('admin-screen');
 
-        if (loggedIn) {
-            loginScreen.classList.add('logged-in');
-            adminScreen.classList.add('logged-in');
-        } else {
+        console.log('checkAuth() - loggedIn:', loggedIn, 'loginScreen:', loginScreen, 'adminScreen:', adminScreen);
+
+        // Видаляємо класи спочатку
+        if (loginScreen) {
             loginScreen.classList.remove('logged-in');
-            adminScreen.classList.remove('logged-in');
+            if (adminScreen) adminScreen.classList.remove('logged-in');
+        }
+
+        // Додаємо клас залежно від стану логіну
+        if (loggedIn) {
+            console.log('Adding logged-in class');
+            if (loginScreen) loginScreen.classList.add('logged-in');
+            if (adminScreen) adminScreen.classList.add('logged-in');
         }
 
         return loggedIn;

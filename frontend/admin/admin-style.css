@@ -12,20 +12,17 @@ body { margin: 0; background-color: #f1f5f9; color: #334155; }
 .login-box button:hover { background: #0284c7; }
 
 /* 3. ОСНОВНА СІТКА АДМІНКИ */
-#admin-screen { display: none; min-height: 100vh; }
-#admin-screen.logged-in { display: flex; }
-#login-screen.logged-in { display: none; }
-.sidebar { width: 260px; background: #1e293b; color: white; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; overflow-y: auto; z-index: 100; }
-.sidebar h2 { margin-top: 0; font-size: 22px; margin-bottom: 30px; text-align: center; color: #fff; border-bottom: 1px solid #334155; padding-bottom: 15px;}
+#admin-screen { display: none; min-height: 100vh; flex-direction: row; }
+#admin-screen.logged-in { display: flex !important; }
+.sidebar { width: 260px; background: #1e293b; color: white; padding: 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; overflow-y: auto; z-index: 100; }
+.sidebar h2 { margin-top: 0; margin-bottom: 20px; text-align: center; color: #fff; font-size: 20px; border-bottom: 1px solid #334155; padding-bottom: 15px; }
 .sidebar button { display: block; width: 100%; padding: 12px 15px; margin-bottom: 8px; background: transparent; color: #cbd5e1; border: none; text-align: left; cursor: pointer; border-radius: 6px; font-size: 15px; font-weight: 500; transition: 0.2s; }
 .sidebar button:hover, .sidebar button.active { background: #334155; color: white; padding-left: 20px; }
-.logout-btn { margin-top: auto; background: rgba(239, 68, 68, 0.1) !important; color: #ef4444 !important; text-align: center !important; }
-.logout-btn:hover { background: #ef4444 !important; color: white !important; }
-
-.main-content { flex: 1; padding: 40px; margin-left: 260px; width: calc(100% - 260px); max-width: 1200px; }
+.sidebar .logout-btn { background: rgba(239, 68, 68, 0.1) !important; color: #ef4444 !important; text-align: center !important; padding-left: 15px !important; }
+.sidebar .logout-btn:hover { background: #ef4444 !important; color: white !important; }
+.main-content { flex: 1; padding: 40px; margin-left: 260px; width: calc(100% - 260px); overflow-y: auto; background: #f8fafc; }
 .tab-content { display: none; animation: fadeIn 0.3s ease; }
 .tab-content.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 h1 { font-size: 28px; margin-top: 0; margin-bottom: 25px; color: #0f172a; }
 h3 { margin-top: 0; margin-bottom: 20px; color: #1e293b; }
