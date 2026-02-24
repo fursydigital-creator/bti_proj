@@ -126,6 +126,15 @@ class RequestItem(Base):
     date_str = Column(String)
     status = Column(String, default="Нова")
 
+
+class TeamMember(Base):
+    __tablename__ = "team_members"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    position = Column(String)
+    description = Column(String)
+    image_url = Column(String)
+
 Base.metadata.create_all(bind=engine)
 os.makedirs("uploads", exist_ok=True)
 
@@ -283,7 +292,49 @@ def initialize_services():
 
 initialize_services()
 
-# 4. СХЕМИ PYDANTIC
+
+def initialize_team():
+    """Ініціалізує команду з демо-даними при першому запуску"""
+    db = SessionLocal()
+    try:
+        # Перевіряємо, чи уже є команда
+        existing_count = db.query(TeamMember).count()
+        if existing_count > 0:
+            return  # Команда вже ініціалізована
+        
+        team_data = [
+            {
+                "name": "Іванов Іван Іванович",
+                "position": "Інженер-інвентаризатор",
+                "description": "Фахівець з подоління повторного обміру будинків та узаконення перепланувань у приватному та багатоквартирному секторі.",
+                "image_url": "https://via.placeholder.com/150?text=Іванов"
+            },
+            {
+                "name": "Петренко Марія Миколаївна",
+                "position": "Інженер-оцінювач",
+                "description": "Цінна експертиза з оцінки нерухомого майна для спадщини, страхування, кредитування та судових справ.",
+                "image_url": "https://via.placeholder.com/150?text=Петренко"
+            },
+            {
+                "name": "Коваленко Сергій Олександрович",
+                "position": "Інженер експериментальної роботи",
+                "description": "Спеціаліст із технічного обстеження та розроблення рішень для виявлення та усунення дефектів конструкції.",
+                "image_url": "https://via.placeholder.com/150?text=Коваленко"
+            }
+        ]
+        
+        for member_data in team_data:
+            db.add(TeamMember(**member_data))
+        
+        db.commit()
+        print("✓ Команда ініціалізована")
+    except Exception as e:
+        print(f"Помилка ініціалізації команди: {e}")
+    finally:
+        db.close()
+
+
+initialize_team()
 class LoginData(BaseModel):
     username: str
     password: str
@@ -336,6 +387,20 @@ class DocumentCreate(BaseModel):
 
 class SettingsUpdate(BaseModel):
     settings: dict
+
+
+class TeamMemberCreate(BaseModel):
+    name: str
+    position: str
+    description: str
+    image_url: str
+
+
+class TeamMemberUpdate(BaseModel):
+    name: Optional[str] = None
+    position: Optional[str] = None
+    description: Optional[str] = None
+    image_url: Optional[str] = None
 
 
 # 5. TELEGRAM ЛОГІКА
@@ -723,3 +788,62 @@ def del_req(
     db.query(RequestItem).filter(RequestItem.id == id).delete()
     db.commit()
     return {"message": "Заявка видалена"}
+
+
+# 11. УПРАВЛІННЯ КОМАНДОЮ
+@app.get("/api/team")
+def get_team(db: Session = Depends(get_db)):
+    """Отримати всіх членів команди (відкритий доступ)"""
+    return db.query(TeamMember).order_by(TeamMember.id).all()
+
+
+@app.get("/api/team/{id}")
+def get_team_member(id: int, db: Session = Depends(get_db)):
+    """Отримати одного спеціаліста за ID"""
+    member = db.query(TeamMember).filter(TeamMember.id == id).first()
+    if not member:
+        raise HTTPException(status_code=404, detail="Спеціаліста не знайдено")
+    return member
+
+
+@app.post("/api/team")
+def add_team_member(
+    member: TeamMemberCreate,
+    db: Session = Depends(get_db),
+    token: dict = Depends(verify_token),
+):
+    """Додати нового спеціаліста"""
+    db.add(TeamMember(**member.dict()))
+    db.commit()
+    return {"ok": True}
+
+
+@app.put("/api/team/{id}")
+def upd_team_member(
+    id: int,
+    member: TeamMemberUpdate,
+    db: Session = Depends(get_db),
+    token: dict = Depends(verify_token),
+):
+    """Оновити дані спеціаліста"""
+    item = db.query(TeamMember).filter(TeamMember.id == id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Спеціаліста не знайдено")
+    
+    for k, v in member.dict(exclude_unset=True).items():
+        setattr(item, k, v)
+    
+    db.commit()
+    return {"ok": True}
+
+
+@app.delete("/api/team/{id}")
+def del_team_member(
+    id: int,
+    db: Session = Depends(get_db),
+    token: dict = Depends(verify_token),
+):
+    """Видалити спеціаліста з команди"""
+    db.query(TeamMember).filter(TeamMember.id == id).delete()
+    db.commit()
+    return {"message": "Спеціаліста видалено"}

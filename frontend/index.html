@@ -65,61 +65,6 @@
       ]
     }
     </script>
-
-    <!-- PERSON SCHEMA FOR TEAM MEMBERS (E-E-A-T) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Іванов Іван Іванович",
-      "jobTitle": "Інженер-інвентаризатор",
-      "worksFor": {
-        "@id": "https://bti-fursy.com.ua/#organization"
-      },
-      "knowsAbout": ["Технічна інвентаризація", "Узаконення перепланувань", "Вимірювання будинків"],
-      "identifier": {
-        "@type": "PropertyValue",
-        "propertyID": "Кваліфікаційний сертифікат",
-        "value": "АЕ №123456"
-      }
-    }
-    </script>
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Петренко Марія Миколаївна",
-      "jobTitle": "Інженер-оцінювач",
-      "worksFor": {
-        "@id": "https://bti-fursy.com.ua/#organization"
-      },
-      "knowsAbout": ["Оцінка нерухомості", "Судова експертиза", "Страхування майна"],
-      "identifier": {
-        "@type": "PropertyValue",
-        "propertyID": "Кваліфікаційний сертифікат",
-        "value": "АЕ №654321"
-      }
-    }
-    </script>
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Коваленко Сергій Олександрович",
-      "jobTitle": "Інженер експериментальної роботи",
-      "worksFor": {
-        "@id": "https://bti-fursy.com.ua/#organization"
-      },
-      "knowsAbout": ["Технічне обстеження", "Аудит конструкцій", "Виявлення дефектів"],
-      "identifier": {
-        "@type": "PropertyValue",
-        "propertyID": "Кваліфікаційний сертифікат",
-        "value": "АЕ №789012"
-      }
-    }
-    </script>
 </head>
 
 <body>
@@ -419,34 +364,8 @@
                 <h2>Наша команда</h2>
                 <p>Сертифіковані інженери з багаторічним дос­відом технічної інвентаризації</p>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
-                <div class="advantage-card" style="text-align: center;">
-                    <div style="width: 150px; height: 150px; margin: 0 auto 20px; background: #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 60px; overflow: hidden;">
-                        <img src="https://via.placeholder.com/150" alt="Іванов Іван" width="150" height="150" style="width: 100%; height: 100%; object-fit: cover;">
-                    </div>
-                    <h3 style="margin-bottom: 5px; color: var(--primary-color);">Іванов Іван Іванович</h3>
-                    <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Інженер-інвентаризатор</p>
-                    <p style="font-size: 12px; color: #999; margin-bottom: 10px;">Кваліфікаційний сертифікат: АЕ №123456</p>
-                    <p style="font-size: 13px; line-height: 1.6;">Фахівець з подоління повторного обміру будинків та узаконення перепланувань у приватному та багатоквартирному секторі.</p>
-                </div>
-                <div class="advantage-card" style="text-align: center;">
-                    <div style="width: 150px; height: 150px; margin: 0 auto 20px; background: #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 60px; overflow: hidden;">
-                        <img src="https://via.placeholder.com/150" alt="Петренко Марія" width="150" height="150" style="width: 100%; height: 100%; object-fit: cover;">
-                    </div>
-                    <h3 style="margin-bottom: 5px; color: var(--primary-color);">Петренко Марія Миколаївна</h3>
-                    <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Інженер-оцінювач</p>
-                    <p style="font-size: 12px; color: #999; margin-bottom: 10px;">Кваліфікаційний сертифікат: АЕ №654321</p>
-                    <p style="font-size: 13px; line-height: 1.6;">Цінна експертиза з оцінки нерухомого майна для спадщини, страхування, кредитування та судових справ.</p>
-                </div>
-                <div class="advantage-card" style="text-align: center;">
-                    <div style="width: 150px; height: 150px; margin: 0 auto 20px; background: #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 60px; overflow: hidden;">
-                        <img src="https://via.placeholder.com/150" alt="Коваленко Сергій" width="150" height="150" style="width: 100%; height: 100%; object-fit: cover;">
-                    </div>
-                    <h3 style="margin-bottom: 5px; color: var(--primary-color);">Коваленко Сергій Олександрович</h3>
-                    <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Інженер експериментальної роботи</p>
-                    <p style="font-size: 12px; color: #999; margin-bottom: 10px;">Кваліфікаційний сертифікат: АЕ №789012</p>
-                    <p style="font-size: 13px; line-height: 1.6;">Спеціаліст із технічного обстеження та розроблення рішень для виявлення та усунення дефектів конструкції.</p>
-                </div>
+            <div id="team-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+                <p style="text-align: center; padding: 40px; color: #999;">Завантаження команди...</p>
             </div>
         </div>
     </section>
@@ -693,6 +612,47 @@
                 });
             } catch (e) { console.error("Помилка Документів:", e); }
         }
+    </script>
+
+    <script>
+        // Завантаження команди
+        async function loadTeam() {
+            try {
+                const response = await fetch(`${API_URL}/team`);
+                if (response.ok) {
+                    const teamData = await response.json();
+                    renderTeam(teamData);
+                }
+            } catch (error) {
+                console.error("Помилка завантаження команди:", error);
+            }
+        }
+
+        function renderTeam(teamData) {
+            const container = document.getElementById('team-container');
+            if (teamData.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">Команда поки не відобразима.</p>';
+                return;
+            }
+
+            let html = '';
+            teamData.forEach(member => {
+                html += `
+                    <div class="advantage-card" style="text-align: center;">
+                        <div style="width: 150px; height: 150px; margin: 0 auto 20px; background: #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 60px; overflow: hidden;">
+                            <img src="${member.image_url}" alt="${member.name}" width="150" height="150" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <h3 style="margin-bottom: 5px; color: var(--primary-color);">${member.name}</h3>
+                        <p style="font-size: 14px; color: #666; margin-bottom: 15px;">${member.position}</p>
+                        <p style="font-size: 13px; line-height: 1.6;">${member.description}</p>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // Завантажити команду під час завантаження сторінки
+        document.addEventListener('DOMContentLoaded', loadTeam);
     </script>
 
     <script src="config.js"></script>

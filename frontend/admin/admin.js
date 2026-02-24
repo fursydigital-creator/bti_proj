@@ -148,6 +148,7 @@ const ITEMS_PER_PAGE = 5;
             if (tabId === 'tab-contacts') loadContacts();
             if (tabId === 'tab-documents') loadDocuments();
             if (tabId === 'tab-requests') loadRequests();
+            if (tabId === 'tab-team') loadTeam();
         }
 
         function showStatus(msg, isError = false) {
@@ -603,6 +604,152 @@ const ITEMS_PER_PAGE = 5;
             });
 
             renderPagination(allRequestsData.length, page, 'requests-pagination', renderRequestsPage);
+        }
+
+        // ---- УПРАВЛІННЯ КОМАНДОЮ ----
+        let allTeamData = [];
+        let currentTeamPage = 1;
+        let editingTeamId = null;
+
+        async function loadTeam() {
+            try {
+                const res = await fetch(`${API_URL}/team`);
+                allTeamData = await res.json();
+                renderTeamPage(1);
+            } catch(e) { console.error("Помилка загрузки команди", e); }
+        }
+
+        function renderTeamPage(page) {
+            currentTeamPage = page;
+            const list = document.getElementById('team-list');
+            list.innerHTML = '';
+
+            if (allTeamData.length === 0) { 
+                list.innerHTML = '<p>Команда поки пуста. Додайте першого спеціаліста.</p>'; 
+                return; 
+            }
+
+            const start = (page - 1) * ITEMS_PER_PAGE;
+            const pageItems = allTeamData.slice(start, start + ITEMS_PER_PAGE);
+
+            pageItems.forEach(m => {
+                list.innerHTML += `<div class="list-item" style="display: grid; grid-template-columns: 1fr 3fr 1fr; gap: 15px; align-items: center;">
+                    <div style="text-align: center;">
+                        <img src="${m.image_url}" alt="${m.name}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">
+                    </div>
+                    <div>
+                        <strong style="font-size: 16px;">${m.name}</strong>
+                        <div style="color: #0ea5e9; font-weight: 600; margin: 5px 0;">${m.position}</div>
+                        <p style="font-size: 13px; color: #64748b; margin: 8px 0;">${m.description.substring(0, 100)}...</p>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-direction: column;">
+                        <button class="action-btn" style="background: #f59e0b; padding: 6px 12px; font-size: 13px; width: 100%; margin: 0;" onclick="editTeamMember(${m.id})">Редагувати</button>
+                        <button class="action-btn del-btn" style="width: 100%; padding: 6px 12px; font-size: 13px;" onclick="deleteTeamMember(${m.id})">Видалити</button>
+                    </div>
+                </div>`;
+            });
+
+            renderPagination(allTeamData.length, page, 'team-pagination', renderTeamPage);
+        }
+
+        async function editTeamMember(id) {
+            try {
+                const res = await fetch(`${API_URL}/team/${id}`);
+                const m = await res.json();
+
+                editingTeamId = id;
+                document.getElementById('team-name').value = m.name;
+                document.getElementById('team-position').value = m.position;
+                document.getElementById('team-description').value = m.description;
+                document.getElementById('team-image-url').value = m.image_url;
+
+                const previewDiv = document.getElementById('team-image-preview');
+                previewDiv.style.display = 'block';
+                previewDiv.querySelector('img').src = m.image_url;
+
+                document.getElementById('team-submit-btn').textContent = '💾 Оновити спеціаліста';
+                document.getElementById('team-cancel-btn').style.display = 'block';
+
+                document.getElementById('team-form').scrollIntoView({behavior: 'smooth'});
+            } catch(e) { console.error("Помилка завантаження спеціаліста", e); }
+        }
+
+        function cancelTeamEdit() {
+            editingTeamId = null;
+            document.getElementById('team-form').reset();
+            document.getElementById('team-image-url').value = '';
+            document.getElementById('team-image-preview').style.display = 'none';
+            document.getElementById('team-submit-btn').textContent = '+ Додати спеціаліста';
+            document.getElementById('team-cancel-btn').style.display = 'none';
+        }
+
+        document.getElementById('team-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            let finalImageUrl = document.getElementById('team-image-url').value;
+            const fileInput = document.getElementById('team-image-file');
+
+            if (fileInput.files.length > 0) {
+                showStatus('Завантаження фото...', false);
+                try {
+                    finalImageUrl = await uploadImageFile(fileInput.files[0]);
+                } catch(err) {
+                    showStatus('Помилка завантаження фото', true);
+                    return;
+                }
+            } else if (!finalImageUrl) {
+                alert("Будь ласка, виберіть фото!");
+                return;
+            }
+
+            const teamData = {
+                name: document.getElementById('team-name').value,
+                position: document.getElementById('team-position').value,
+                description: document.getElementById('team-description').value,
+                image_url: finalImageUrl
+            };
+
+            try {
+                if (editingTeamId) {
+                    await fetchProtected(`${API_URL}/team/${editingTeamId}`, { 
+                        method: 'PUT', 
+                        body: JSON.stringify(teamData) 
+                    });
+                    showStatus('Спеціаліста успішно оновлено!');
+                } else {
+                    await fetchProtected(`${API_URL}/team`, { 
+                        method: 'POST', 
+                        body: JSON.stringify(teamData) 
+                    });
+                    showStatus('Спеціаліста успішно додано!');
+                }
+
+                cancelTeamEdit();
+                loadTeam();
+            } catch(err) { showStatus('Помилка збереження', true); }
+        });
+
+        // Preview для завантаженого фото
+        document.getElementById('team-image-file').addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const previewDiv = document.getElementById('team-image-preview');
+                    previewDiv.style.display = 'block';
+                    previewDiv.querySelector('img').src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        async function deleteTeamMember(id) {
+            if (!confirm('Ви впевнені, що хочете видалити цього спеціаліста?')) return;
+            try {
+                await fetchProtected(`${API_URL}/team/${id}`, { method: 'DELETE' });
+                showStatus('Спеціаліста видалено!');
+                loadTeam();
+            } catch(e) { showStatus('Помилка видалення', true); }
         }
 
         checkAuth();
