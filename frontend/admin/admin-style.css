@@ -13,6 +13,8 @@ body { margin: 0; background-color: #f1f5f9; color: #334155; }
 
 /* 3. ОСНОВНА СІТКА АДМІНКИ */
 #admin-screen { display: none; min-height: 100vh; }
+#admin-screen.logged-in { display: flex; }
+#login-screen.logged-in { display: none; }
 .sidebar { width: 260px; background: #1e293b; color: white; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; overflow-y: auto; z-index: 100; }
 .sidebar h2 { margin-top: 0; font-size: 22px; margin-bottom: 30px; text-align: center; color: #fff; border-bottom: 1px solid #334155; padding-bottom: 15px;}
 .sidebar button { display: block; width: 100%; padding: 12px 15px; margin-bottom: 8px; background: transparent; color: #cbd5e1; border: none; text-align: left; cursor: pointer; border-radius: 6px; font-size: 15px; font-weight: 500; transition: 0.2s; }

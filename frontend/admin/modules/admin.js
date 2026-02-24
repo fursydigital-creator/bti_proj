@@ -1,7 +1,17 @@
 // admin.js
 import { CrudController } from './crud.js';
+import { AuthManager, initLoginForm, initLogoutButtons } from './auth.js';
 
+// Перевірка аутентифікації при завантаженні
 document.addEventListener('DOMContentLoaded', () => {
+    AuthManager.checkAuth();
+    initLoginForm();
+    initLogoutButtons();
+    
+    // Якщо не залогінений, виходимо
+    if (!AuthManager.isLoggedIn()) {
+        return;
+    }
     
     // 1. Ініціалізація новин
     const newsController = new CrudController({
@@ -81,3 +91,16 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     });
 });
+
+// Глобальна функція для переключення табів (для onclick у HTML)
+window.openTab = function(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.sidebar button').forEach(el => el.classList.remove('active'));
+    
+    const tab = document.getElementById(tabId);
+    if (tab) {
+        tab.classList.add('active');
+    }
+    
+    event.target?.classList.add('active');
+};
