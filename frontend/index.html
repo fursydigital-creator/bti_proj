@@ -397,11 +397,6 @@
     </footer>
 
 <script>
-        // Розумне визначення адреси API
-        const API_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
-            ? 'http://127.0.0.1:8000/api' 
-            : '/api';
-
         // --- 1. МОБІЛЬНЕ МЕНЮ ТА ФОРМА ---
         function toggleMenu() {
             const nav = document.getElementById('nav-menu');
@@ -655,7 +650,257 @@
         document.addEventListener('DOMContentLoaded', loadTeam);
     </script>
 
-    <script src="config.js"></script>
-    <script src="contacts.js"></script>
 </body>
 </html>
+
+<script src="config.js"></script>
+<script src="contacts.js"></script>
+<script>
+        // --- 1. МОБІЛЬНЕ МЕНЮ ТА ФОРМА ---
+        function toggleMenu() {
+            const nav = document.getElementById('nav-menu');
+            const toggleBtn = document.querySelector('.mobile-toggle');
+            nav.classList.toggle('mobile-menu-open');
+            if (nav.classList.contains('mobile-menu-open')) {
+                toggleBtn.textContent = '✕';
+            } else {
+                toggleBtn.textContent = '☰';
+            }
+        }
+
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('nav-menu').classList.remove('mobile-menu-open');
+                document.querySelector('.mobile-toggle').textContent = '☰';
+            });
+        });
+
+        async function sendForm(event) {
+            event.preventDefault(); // Зупиняємо стандартне перезавантаження сторінки
+            const form = document.getElementById('contact-form');
+            const formData = new FormData(form);
+            
+            const data = {
+                name: formData.get('name'),
+                phone: formData.get('phone'), // Беремо телефон
+                message: formData.get('message') || "" // Якщо пусте, передаємо пустой рядок
+            };
+
+            // Змінюємо текст кнопки на час відправки
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Відправка...';
+            submitBtn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/requests`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (res.ok) {
+                    alert('Повідомлення надіслано! Ми зв\'яжемося з вами найближчим часом.');
+                    form.reset();
+                } else {
+                    alert('Виникла помилка. Спробуйте пізніше.');
+                }
+            } catch (e) {
+                alert('Помилка з\'єднання з сервером.');
+            } finally {
+                // Повертаємо кнопку в норму
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+            return false;
+        }
+
+        // --- 2. ЗАВАНТАЖЕННЯ ДАНИХ З БЕКЕНДУ ---
+        async function fetchHeroSettings() {
+            try {
+                const res = await fetch(`${API_URL}/settings/hero`);
+                const data = await res.json();
+                document.getElementById('hero-subtitle').innerHTML = data.subtitle;
+            } catch (e) { console.error("Помилка Hero:", e); }
+        }
+
+        async function fetchFaqs() {
+            try {
+                const res = await fetch(`${API_URL}/faqs`);
+                const faqs = await res.json();
+                const wrapper = document.getElementById('faq-wrapper');
+                
+                // Масив для збору даних під JSON-LD
+                const schemaEntities = [];
+                
+                // Використовуємо requestAnimationFrame для оптимізації DOM оновлень
+                requestAnimationFrame(() => {
+                    let html = '';
+                    
+                    faqs.forEach(f => {
+                        html += `<div class="faq-item"><div class="faq-question">${f.question}</div><div class="faq-answer"><div class="faq-content-inner">${f.answer}</div></div></div>`;
+                        
+                        // Очищення від HTML тегів для Schema
+                        const plainTextAnswer = f.answer.replace(/(<([^>]+)>)/gi, "");
+                        
+                        schemaEntities.push({
+                            "@type": "Question",
+                            "name": f.question,
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": plainTextAnswer
+                            }
+                        });
+                    });
+                    
+                    wrapper.innerHTML = html;
+                    initAccordion(); // Активуємо кліки після завантаження
+                    
+                    // Динамічна ін'єкція FAQPage Schema у глобальний граф знань
+                    if (schemaEntities.length > 0) {
+                        const script = document.createElement('script');
+                        script.type = "application/ld+json";
+                        script.text = JSON.stringify({
+                            "@context": "https://schema.org",
+                            "@type": "FAQPage",
+                            "mainEntity": schemaEntities
+                        });
+                        document.head.appendChild(script);
+                    }
+                });
+            } catch (e) { console.error("Помилка FAQ:", e); }
+        }
+
+        async function fetchNews() {
+            try {
+                const res = await fetch(`${API_URL}/news`);
+                const newsData = await res.json();
+                const container = document.getElementById('news-container');
+                
+                if (newsData.length === 0) {
+                    container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">Новин поки немає.</p>';
+                    return;
+                }
+
+                // Оптимізація DOM оновлень через requestAnimationFrame
+                requestAnimationFrame(() => {
+                    let html = '';
+                    // Беремо лише 3 останні новини для головної сторінки
+                    const topNews = newsData.slice(0, 3);
+                    
+                    topNews.forEach(n => {
+                        // Якщо картинки немає, ставимо заглушку
+                        const img = n.image_url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop';
+                        html += `
+                        <article class="news-card">
+                            <div class="news-img-wrapper">
+                                <img src="${img}" alt="Фото новини">
+                                <span class="news-tag">${n.tag}</span>
+                            </div>
+                            <div class="news-content">
+                                <div class="news-meta">${n.date_str}</div>
+                                <h3>${n.title}</h3>
+                                <p>${n.preview}</p>
+                                <a href="article.html?id=${n.id}" class="news-link">Читати далі →</a>
+                            </div>
+                        </article>`;
+                    });
+                    container.innerHTML = html;
+                });
+            } catch (e) { console.error("Помилка Новин:", e); }
+        }
+
+        // --- 3. ЛОГІКА АКОРДЕОНА (FAQ) ---
+        function initAccordion() {
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                const q = item.querySelector('.faq-question');
+                const a = item.querySelector('.faq-answer');
+                // Видаляємо старі слухачі, щоб не дублювались
+                const newQ = q.cloneNode(true);
+                q.parentNode.replaceChild(newQ, q);
+                
+                newQ.addEventListener('click', () => {
+                    item.classList.toggle('active');
+                    if (item.classList.contains('active')) a.style.maxHeight = a.scrollHeight + "px";
+                    else a.style.maxHeight = null;
+                });
+            });
+        }
+
+        async function fetchDocuments() {
+            try {
+                const res = await fetch(`${API_URL}/documents`);
+                const docsData = await res.json();
+                const container = document.getElementById('downloads-container');
+                
+                if (docsData.length === 0) {
+                    container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">Бланки тимчасово недоступні.</p>';
+                    return;
+                }
+
+                // Оптимізація DOM оновлень через requestAnimationFrame
+                requestAnimationFrame(() => {
+                    let html = '';
+                    docsData.forEach(d => {
+                        // Стандартна красива іконка для всіх документів
+                        html += `
+                        <a href="${d.file_url}" target="_blank" class="doc-card">
+                            <div class="doc-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            </div>
+                            <h3 class="doc-title">${d.title}</h3>
+                            <span class="doc-type">${d.file_type}</span>
+                            <span class="doc-btn">Завантажити</span>
+                        </a>`;
+                    });
+                    container.innerHTML = html;
+                });
+            } catch (e) { console.error("Помилка Документів:", e); }
+        }
+
+        // Завантаження команди
+        async function loadTeam() {
+            try {
+                const response = await fetch(`${API_URL}/team`);
+                if (response.ok) {
+                    const teamData = await response.json();
+                    renderTeam(teamData);
+                }
+            } catch (error) {
+                console.error("Помилка завантаження команди:", error);
+            }
+        }
+
+        function renderTeam(teamData) {
+            const container = document.getElementById('team-container');
+            if (teamData.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">Команда поки не відобразима.</p>';
+                return;
+            }
+
+            let html = '';
+            teamData.forEach(member => {
+                html += `
+                    <div class="advantage-card" style="text-align: center;">
+                        <div style="width: 150px; height: 150px; margin: 0 auto 20px; background: #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 60px; overflow: hidden;">
+                            <img src="${member.image_url}" alt="${member.name}" width="150" height="150" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <h3 style="margin-bottom: 5px; color: var(--primary-color);">${member.name}</h3>
+                        <p style="font-size: 14px; color: #666; margin-bottom: 15px;">${member.position}</p>
+                        <p style="font-size: 13px; line-height: 1.6;">${member.description}</p>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // --- 4. ЗАПУСК ПРИ СТАРТІ СТОРІНКИ ---
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchHeroSettings();
+            fetchFaqs();
+            fetchNews();
+            fetchDocuments();
+            loadTeam();
+        });
+</script>

@@ -249,9 +249,6 @@
     });
 
     // Відправка форми
-    const API_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
-        ? 'http://127.0.0.1:8000/api' : '/api';
-
     async function sendForm(event) {
         event.preventDefault();
         const form = document.getElementById('contact-form');
