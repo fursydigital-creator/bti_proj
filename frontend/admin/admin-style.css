@@ -38,6 +38,20 @@ input:focus, textarea:focus { border-color: #0ea5e9; background: #fff; }
 .del-btn { background: #ef4444; padding: 8px 14px; font-size: 13px; float: right; margin-top: -2px; }
 .del-btn:hover { background: #dc2626; }
 
+/* Форми */
+.form-block { display: flex; flex-direction: column; gap: 15px; }
+.form-inline { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+.form-inline input, .form-inline select { flex: 1; min-width: 150px; }
+.form-inline button { flex-shrink: 0; }
+
+/* Два стовпця для новин */
+.two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+.two-columns > div { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+.two-columns h2 { margin-top: 0; margin-bottom: 20px; }
+
+/* Список */
+.list-block { background: white; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; }
+
 /* Рядки для таблиці послуг */
 .price-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
 .price-row input { margin-bottom: 0 !important; }
@@ -98,6 +112,11 @@ input:focus, textarea:focus { border-color: #0ea5e9; background: #fff; }
     .req-card { flex-direction: column; }
     .req-controls { width: 100%; flex-direction: column; align-items: stretch; margin-top: 10px; }
     .req-controls select, .req-controls button { width: 100%; margin: 0 !important; text-align: center; }
+    
+    /* Адаптація двох колон під телефон */
+    .two-columns { grid-template-columns: 1fr; }
+    .form-inline { flex-direction: column; }
+    .form-inline input, .form-inline select, .form-inline button { width: 100% !important; }
 }
 /* Відновлення списків для текстового редактора */
 .ql-editor ul, .ql-editor ol { padding-left: 20px; }
