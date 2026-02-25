@@ -11,119 +11,116 @@
     <link rel="stylesheet" href="style.css?v=2">
     
     <style>
-    /* 1. Глобальне скидання (щоб padding не збільшував ширину блоків) */
-*, *::before, *::after {
-    box-sizing: border-box;
-}
+    
+    /* 1. Глобальні фікси (безпечні для десктопу і мобілки) */
+    body, html { overflow-x: hidden; width: 100%; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; }
+    
+    /* Щоб довгий текст не розпирав grid-контейнери */
+    .service-layout > * { min-width: 0; }
 
-/* 2. Фікс розпирання Grid-контейнера (КРИТИЧНО) */
-.service-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    width: 100%;
-    max-width: 100vw;
-}
-
-.service-layout > * {
-    min-width: 0; /* Дозволяє grid-елементам стискатися менше за їхній контент */
-    max-width: 100%;
-}
-
-/* 3. Жорсткий фікс блоку переваг */
-.benefits-row {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    width: 100%;
-    overflow: hidden; /* Обрізає все, що намагається вилізти */
-}
-
-.benefit-item {
-    display: flex;
-    align-items: flex-start; /* Щоб іконка не розтягувалась */
-    width: 100%;
-}
-
-.benefit-item span {
-    flex: 1;
-    min-width: 0;
-    white-space: normal !important; /* Примусовий перенос тексту */
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-}
-
-/* 4. Ізоляція таблиці */
-/* Контейнер таблиці: дизайн під картку з тінню */
-.table-responsive {
-    width: 100%;
-    overflow: hidden; /* Жорстко вимикаємо горизонтальний скрол */
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Легка тінь як на референсі */
-    border: 1px solid #f5f5f5;
-    margin-bottom: 32px;
-}
-
-/* Сама таблиця */
-.pricing-table {
-    width: 100%;
-    min-width: 100%; /* Скасовуємо попередні 450px/500px */
-    border-collapse: collapse;
-    table-layout: fixed; /* КРИТИЧНО: Примусово ділить ширину між колонками без виходу за межі */
-}
-
-/* Комірки */
-.pricing-table th, 
-.pricing-table td {
-    padding: 14px 10px;
-    font-size: 13px; /* Трохи менший шрифт, щоб влізло 3 колонки */
-    line-height: 1.4;
-    white-space: normal !important; /* Дозволяємо тексту падати на наступний рядок */
-    word-wrap: break-word;
-    border: none; /* Забираємо вертикальні лінії */
-    border-bottom: 1px solid #f0f0f0; /* Залишаємо лише легкі горизонтальні */
-    text-align: left;
-    vertical-align: middle;
-}
-
-/* Останній ряд без лінії знизу */
-.pricing-table tr:last-child td {
-    border-bottom: none;
-}
-
-/* Балансуємо ширину колонок (Послуга - Термін - Ціна) */
-.pricing-table th:nth-child(1),
-.pricing-table td:nth-child(1) { 
-    width: 45%; 
-    color: #333; /* Темніший колір для назви послуги */
-}
-
-.pricing-table th:nth-child(2),
-.pricing-table td:nth-child(2) { 
-    width: 25%; 
-    color: #666; /* Світліший колір для термінів */
-}
-
-.pricing-table th:nth-child(3),
-.pricing-table td:nth-child(3) { 
-    width: 30%; 
-}
-
-/* Стилізація ціни (синій акцент як на референсі) */
-.pricing-table td:nth-child(3) strong {
-    color: #004d99; /* Синій колір (можеш змінити на var(--primary-color)) */
-    font-size: 14px;
-    font-weight: 700;
-}
-
-/* Для найменших екранів (iPhone SE тощо) */
-@media (max-width: 380px) {
-    .pricing-table th, 
-    .pricing-table td {
-        padding: 12px 6px;
-        font-size: 12px;
+    /* 2. ДЕСКТОП: Повертаємо 2 колонки та sticky-сайдбар (якщо затерлося) */
+    @media (min-width: 993px) {
+        .service-layout {
+            display: grid;
+            grid-template-columns: 1fr 350px; /* 1 фракція під контент, 350px під сайдбар */
+            gap: 30px;
+            align-items: start;
+        }
+        .service-sidebar {
+            position: sticky;
+            top: 20px; /* Сайдбар прилипає при скролі */
+        }
     }
-}
+
+    /* 3. ПЛАНШЕТИ (769px - 992px): Сайдбар падає вниз, але дизайн ПК */
+    @media (max-width: 992px) {
+        .service-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        .service-sidebar { position: static; }
+    }
+
+    /* 4. МОБІЛКИ (до 768px): Повна адаптація + Нова таблиця */
+    @media (max-width: 768px) {
+        /* Шапка */
+        .page-header { padding: 40px 15px !important; text-align: center; }
+        .page-header h1 { font-size: clamp(22px, 6vw, 28px) !important; line-height: 1.3; margin-bottom: 15px !important; }
+        .hero-subtitle { font-size: 15px !important; margin-bottom: 20px !important; line-height: 1.5; padding: 0 !important; }
+        .breadcrumbs { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px 8px; font-size: 13px; margin-bottom: 15px !important; }
+        .content-title { font-size: 21px !important; margin: 25px 0 15px !important; }
+
+        /* Нова мобільна таблиця (Картка без скролу) */
+        .table-responsive {
+            width: 100%;
+            overflow: hidden !important; 
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+            border: 1px solid #f5f5f5 !important;
+            margin-bottom: 30px !important;
+        }
+        .pricing-table {
+            width: 100%;
+            min-width: 100% !important; 
+            border-collapse: collapse;
+            table-layout: fixed !important; 
+        }
+        .pricing-table th, .pricing-table td {
+            padding: 12px 8px !important;
+            font-size: 13px !important;
+            line-height: 1.4 !important;
+            white-space: normal !important; 
+            word-wrap: break-word !important;
+            border: none !important;
+            border-bottom: 1px solid #f0f0f0 !important;
+            text-align: left !important;
+        }
+        .pricing-table tr:last-child td { border-bottom: none !important; }
+        
+        /* Пропорції колонок таблиці */
+        .pricing-table th:nth-child(1), .pricing-table td:nth-child(1) { width: 45% !important; color: #333 !important; }
+        .pricing-table th:nth-child(2), .pricing-table td:nth-child(2) { width: 25% !important; color: #666 !important; }
+        .pricing-table th:nth-child(3), .pricing-table td:nth-child(3) { width: 30% !important; }
+        .pricing-table td:nth-child(3) strong { color: #004d99 !important; font-size: 14px !important; }
+
+        /* Переваги (Блок не розпирає екран) */
+        .benefits-row { 
+            display: flex !important; 
+            flex-direction: column !important; 
+            gap: 15px !important; 
+            width: 100%; 
+            overflow: hidden; 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 12px; 
+        }
+        .benefit-item { display: flex !important; align-items: flex-start !important; gap: 12px !important; width: 100%; font-size: 14px !important; }
+        .benefit-item span { flex: 1; min-width: 0; white-space: normal !important; word-wrap: break-word; }
+        .benefit-icon { flex-shrink: 0; font-size: 24px !important; margin: 0 !important; }
+
+        /* Форма та Інпути (iOS Zoom Fix) */
+        .sidebar-card { padding: 20px 15px !important; margin-bottom: 20px !important; width: 100%; }
+        .sidebar-card h3 { font-size: 19px !important; text-align: center; }
+        .form-control { font-size: 16px !important; padding: 12px !important; }
+
+        /* Кнопки месенджерів */
+        .messenger-links { display: flex !important; flex-direction: column !important; gap: 10px !important; }
+        .msg-btn { width: 100%; justify-content: center; }
+
+        /* Команда і Карта */
+        #team-container { display: grid !important; grid-template-columns: 1fr !important; gap: 15px !important; }
+        .advantage-card { padding: 20px 15px !important; }
+        .map-container iframe { height: 250px !important; }
+    }
+
+    /* Мікро-екрани (iPhone SE) */
+    @media (max-width: 380px) {
+        .pricing-table th, .pricing-table td { padding: 10px 4px !important; font-size: 12px !important; }
+    }
+
 </style>
 
     <script type="application/ld+json">
